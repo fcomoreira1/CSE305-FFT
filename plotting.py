@@ -22,7 +22,7 @@ def plotJSON(filename, fileout = 'plot.png'):
 
     # Plotting
     if plot_x_type == 'date':
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d-%Y'))
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
         plt.gca().xaxis.set_major_locator(mdates.DayLocator())
     plt.xlim((plot_x_min, plot_x_max))
     plt.plot(data['Data'])

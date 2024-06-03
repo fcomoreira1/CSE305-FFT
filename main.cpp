@@ -1,4 +1,5 @@
 #include "algorithms.h"
+#include "parser.h"
 #include <chrono>
 #include <iostream>
 
@@ -14,7 +15,7 @@ void benchmark_fft(std::vector<T> data, T fft(std::vector<T>),
     std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms" << std::endl;
 }
 
-int main() {
+int test_fft() {
     int n, k;
     std::cin >> k;
     n = 1 << k;
@@ -32,5 +33,9 @@ int main() {
         std::cout << t << " ";
     }
     std::cout << std::endl;
+    return 0;
+}
+int main() {
+    test_parser();
     return 0;
 }
