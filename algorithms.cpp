@@ -1,5 +1,5 @@
-#include "algorithms.h"
 #define _USE_MATH_DEFINES
+#include "algorithms.h"
 #include <math.h>
 
 Complex nth_root_unity(int n) {
