@@ -19,18 +19,22 @@ int test_fft() {
     int n, k;
     std::cin >> k;
     n = 1 << k;
-    std::vector<Complex> x(n);
+
+    Complex* x      = (Complex *) std::malloc(n*sizeof(Complex));
+    Complex* x_coef = (Complex *) std::malloc(n*sizeof(Complex));
+    Complex* z      = (Complex *) std::malloc(n*sizeof(Complex));
+
     for (int i = 0; i < n; i++) {
         std::cin >> x[i];
     }
-    auto x_coef = fft_baseline(x);
-    for (auto t : x_coef) {
-        std::cout << t << " ";
+    fft_radix2_seq_(x, x_coef, n);
+    for (int i = 0; i < n; i ++) {
+        std::cout << x_coef[i] << " ";
     }
     std::cout << std::endl;
-    auto z = ifft_baseline(x_coef);
-    for (auto t : z) {
-        std::cout << t << " ";
+    ifft_radix2_seq_(x_coef, z, n);
+    for (int i = 0; i < n; i ++) {
+        std::cout << z[i] << " ";
     }
     std::cout << std::endl;
     return 0;
@@ -38,4 +42,5 @@ int test_fft() {
 int main() {
     test_parser();
     return 0;
+    // return test_fft();
 }
