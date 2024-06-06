@@ -4,8 +4,7 @@
 #include <sstream>
 #include <stdlib.h>
 
-std::vector<double> readCSV(std::string filename, int index,
-                            bool printing) {
+std::vector<double> readCSV(std::string filename, int index, bool printing) {
 
     // Setup file
     std::ifstream myfile;
@@ -41,10 +40,8 @@ std::vector<double> readCSV(std::string filename, int index,
 }
 
 void saveJSON(std::vector<double> input, std::string filename,
-              std::string plot_name, std::string x_label ,
-              std::string y_label, std::string x_type,
-              std::string x_min,
-              std::string x_max) {
+              std::string plot_name, std::string x_label, std::string y_label,
+              std::string x_type, std::string x_min, std::string x_max) {
     //         f = fopen(filename.c_str(), "w+");
     // fprintf(f, "<svg xmlns = \"http://www.w3.org/2000/svg\" width = \"1000\"
     // height = \"1000\">\n"); fprintf(f, "<g>\n");
@@ -69,43 +66,50 @@ void saveJSON(std::vector<double> input, std::string filename,
 }
 
 void saveFile(std::vector<double> input, std::string filename,
-              std::string plot_name, std::string x_label ,
-              std::string y_label, std::string x_type,
-              std::string x_min,
-              std::string x_max) {
+              std::string plot_name, std::string x_label, std::string y_label,
+              std::string x_type, std::string x_min, std::string x_max) {
     FILE *f = fopen(filename.c_str(), "w");
     for (int i = 0; i < input.size(); i++) {
         fprintf(f, "%3.5f\n", input[i]);
     }
-    fprintf(f, "\n%zu,%s,%s,%s,%s,%s,%s", input.size(), plot_name.c_str(), x_type.c_str(),
-            x_min.c_str(), x_max.c_str(), x_label.c_str(), y_label.c_str());
+    fprintf(f, "\n%zu,%s,%s,%s,%s,%s,%s", input.size(), plot_name.c_str(),
+            x_type.c_str(), x_min.c_str(), x_max.c_str(), x_label.c_str(),
+            y_label.c_str());
 }
 
 void plotData(std::vector<double> input, std::string plotname,
-              std::string filename, std::string plot_name,
-              std::string x_label, std::string y_label,
-              std::string x_type, std::string x_min,
+              std::string filename, std::string plot_name, std::string x_label,
+              std::string y_label, std::string x_type, std::string x_min,
               std::string x_max) {
     std::string args = "";
-    for (int i = 0; i < input.size(); i ++) {
+    for (int i = 0; i < input.size(); i++) {
         args.append(std::to_string(input[i]));
         args.append(" ");
     }
-    args.append(std::to_string(input.size()));  args.append(" ");
-    args.append(plot_name);                     args.append(" ");
-    args.append(x_type);                        args.append(" ");
-    args.append(x_min);                         args.append(" ");
-    args.append(x_max);                         args.append(" ");
-    args.append(x_label);                       args.append(" ");
-    args.append(y_label);                       args.append(" ");
-    args.append(plotname);                      args.append(" ");
+    args.append(std::to_string(input.size()));
+    args.append(" ");
+    args.append(plot_name);
+    args.append(" ");
+    args.append(x_type);
+    args.append(" ");
+    args.append(x_min);
+    args.append(" ");
+    args.append(x_max);
+    args.append(" ");
+    args.append(x_label);
+    args.append(" ");
+    args.append(y_label);
+    args.append(" ");
+    args.append(plotname);
+    args.append(" ");
 
     // FILE *f = fopen(filename.c_str(), "w");
     // fprintf(f, args.c_str());
     // std::cout << "Finished generating file!" << std::endl;
 
     std::ofstream fs;
-    fs.open("_in_data.txt", std::ofstream::in | std::ofstream::out | std::ofstream::trunc);
+    fs.open("_in_data.txt",
+            std::ofstream::in | std::ofstream::out | std::ofstream::trunc);
     fs << args;
     fs.close();
     std::cout << "Finished generating file!" << std::endl;
