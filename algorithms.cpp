@@ -47,7 +47,7 @@ void fft_radix2_seq_(const Complex *x, Complex *y, int n, int d) {
     */
 
     // Trivial case
-    if (n == d) {
+    if (n == 1) {
         y[0] = x[0];
         return;
     }
@@ -79,7 +79,7 @@ void ifft_radix2_seq_(const Complex *y, Complex *x, int n, int d) {
     */
 
     // Trivial case
-    if (n == d) {
+    if (n == 1) {
         x[0] = y[0];
         return;
     }

@@ -108,7 +108,7 @@ void plotData(std::vector<double> input, std::string plotname,
     // std::cout << "Finished generating file!" << std::endl;
 
     std::ofstream fs;
-    fs.open("_in_data.txt",
+    fs.open("data/_in_data.txt",
             std::ofstream::in | std::ofstream::out | std::ofstream::trunc);
     fs << args;
     fs.close();
@@ -120,7 +120,7 @@ int test_parser() {
     std::vector<double> data = readCSV(filename, 1);
     // saveFile(data, "data.txt");
     // system("python plotting.py data.txt");
-    plotData(data, "plot.png", "data.txt");
-    system("python plotting.py _in_data.txt");
+    plotData(data, "data/plot.png", "data/data.txt");
+    system("python plotting.py data/_in_data.txt");
     return 0;
 }
