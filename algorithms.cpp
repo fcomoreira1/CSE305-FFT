@@ -1,10 +1,10 @@
 #include <iostream>
 #define _USE_MATH_DEFINES
 #include "algorithms.h"
+#include "utils.h"
 #include <math.h>
 #include <thread>
 
-Complex nth_root_unity(int n) { return std::polar(1., 2. * M_PI / (double)n); }
 
 void fft_baseline(const Complex *x, Complex *y, int n) {
     /*
@@ -13,7 +13,7 @@ void fft_baseline(const Complex *x, Complex *y, int n) {
         Input x, output y, length n is any positive number (not neccessary
        powers of 2)
     */
-    Complex omega = nth_root_unity(n);
+    Complex omega = nth_primitive_root(n);
     for (int k = 0; k < n; k++) {
         y[k] = 0.0;
         for (int j = 0; j < n; j++) {
@@ -28,7 +28,7 @@ void ifft_baseline(const Complex *y, Complex *x, int n) {
        ifft Expected complexity: O(n^2) Input y, output x, length n is any
        positive number (not neccessary powers of 2)
     */
-    Complex omega = nth_root_unity(n);
+    Complex omega = nth_primitive_root(n);
     for (int k = 0; k < n; k++) {
         x[k] = 0.0;
         for (int j = 0; j < n; j++) {
@@ -57,7 +57,7 @@ void fft_radix2_seq_(const Complex *x, Complex *y, int n, int d) {
     fft_radix2_seq_(x + d, y + n / 2, n / 2, 2 * d);
 
     // Merging
-    Complex omega = nth_root_unity(n);
+    Complex omega = nth_primitive_root(n);
     Complex omega_n = 1;
     Complex temp1, temp2;
     for (int k = 0; k < n / 2; k++) {
@@ -88,7 +88,7 @@ void ifft_radix2_seq_(const Complex *y, Complex *x, int n, int d) {
     ifft_radix2_seq_(y + d, x + n / 2, n / 2, 2 * d);
 
     // Merging
-    Complex omega = nth_root_unity(n);
+    Complex omega = nth_primitive_root(n);
     Complex omega_n = 1;
     Complex temp1, temp2;
     for (int k = 0; k < n / 2; k++) {
