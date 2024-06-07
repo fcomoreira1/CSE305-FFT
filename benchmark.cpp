@@ -1,8 +1,7 @@
 #include "benchmark.h"
 #include <complex>
 template <typename T>
-void benchmark_fft(T *data, int n,
-                   std::function<void(const T *, T *, int)> fft,
+void benchmark_fft(T *data, int n, std::function<void(const T *, T *, int)> fft,
                    std::function<void(const T *, T *, int)> ifft) {
     std::cout << "Benchmarking FFT with data length " << n << "... "
               << std::endl;
@@ -23,6 +22,13 @@ void benchmark_fft(T *data, int n,
     }
     std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
               << std::endl;
+    delete[] data_coef;
+    delete[] z;
 }
 
-template void benchmark_fft<std::complex<double>>(std::complex<double>*, int, std::function<void(const std::complex<double>*, std::complex<double>*, int)>, std::function<void(const std::complex<double>*, std::complex<double>*, int)>);
+template void benchmark_fft<std::complex<double>>(
+    std::complex<double> *, int,
+    std::function<void(const std::complex<double> *, std::complex<double> *,
+                       int)>,
+    std::function<void(const std::complex<double> *, std::complex<double> *,
+                       int)>);
