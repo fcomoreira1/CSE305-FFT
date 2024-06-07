@@ -116,7 +116,7 @@ void plotData(std::vector<double> input, std::string plotname,
 }
 
 int test_parser() {
-    std::string filename = "DailyDelhiClimateTrain.csv";
+    std::string filename = "data/DailyDelhiClimateTrain.csv";
     std::vector<double> data = readCSV(filename, 1);
     // saveFile(data, "data.txt");
     // system("python plotting.py data.txt");

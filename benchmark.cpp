@@ -1,18 +1,16 @@
 #include "benchmark.h"
+#include <complex>
 template <typename T>
-void benchmark_fft(T *data, int n, std::function<void (const T*, T*, int)> fft,
-                   std::function<void (const T*, T*, int)> ifft) {
+void benchmark_fft(T *data, int n,
+                   std::function<void(const T *, T *, int)> fft,
+                   std::function<void(const T *, T *, int)> ifft) {
     std::cout << "Benchmarking FFT with data length " << n << "... "
               << std::endl;
     const auto start{std::chrono::steady_clock::now()};
-    T *data_coef = (T *)std::malloc(n * sizeof(T));
-    T *z = (T *)std::malloc(n * sizeof(T));
+    T *data_coef = new T[n];
+    T *z = new T[n];
 
     fft(data, data_coef, n);
-    // for (int i = 0; i < n; i++) {
-    //     std:: cout << data_coef[i] << " ";
-    // } std::cout << std::endl;
-    std::cout << "checkpoing" << std::endl;
     ifft(data_coef, z, n);
 
     const auto end{std::chrono::steady_clock::now()};
@@ -27,10 +25,4 @@ void benchmark_fft(T *data, int n, std::function<void (const T*, T*, int)> fft,
               << std::endl;
 }
 
-template <typename T>
-void benchmark_fft(T *data, int n, void fft(const T *, T *, int, int),
-                   void ifft(const T *, T *, int, int)) {
-    std::function<void (const T*, T*, int)> fft_ = [&fft](const T *x, T *x_coef, int k) { fft(x, x_coef, k, 1); };
-    std::function<void (const T*, T*, int)> ifft_ = [&ifft](const T *x_coef, T *x, int k) { ifft(x_coef, x, k, 1); };
-    benchmark_fft<T>(data, n, fft_ , ifft_);
-}
+template void benchmark_fft<std::complex<double>>(std::complex<double>*, int, std::function<void(const std::complex<double>*, std::complex<double>*, int)>, std::function<void(const std::complex<double>*, std::complex<double>*, int)>);

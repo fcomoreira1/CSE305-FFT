@@ -77,7 +77,6 @@ void ifft_radix2_seq_(const Complex *y, Complex *x, int n, int d) {
         Input x, output y, length n being powers of 2.
             d is the step size (for input y only), default to 1
     */
-
     // Trivial case
     if (n == 1) {
         x[0] = y[0];
@@ -104,49 +103,23 @@ void ifft_radix2_seq_(const Complex *y, Complex *x, int n, int d) {
 void fft_radix2_seq(const Complex *x, Complex *y, int n) {
     /*
         Fast Fourier transform implementation - Cooley-Tukey algorithm
-        Wraps around fft_radix2_seq_, work with any positive int n
         Expected complexity: O(nlogn)
     */
-
-    int n1 = 1;
-    while (n1 < n) {
-        n1 *= 2;
+    if ( n & (n-1) ) {
+        std::cerr << "Input size must be a power of 2" << std::endl;
+        return;
     }
-
-    Complex *x1 = (Complex *)std::malloc(n1 * sizeof(Complex));
-    Complex *y1 = (Complex *)std::malloc(n1 * sizeof(Complex));
-    for (int i = 0; i < n1; i++) {
-        x1[i] = (i < n) ? x[i] : 0.;
-    }
-    fft_radix2_seq_(x1, y1, n1);
-    for (int i = 0; i < n; i++) {
-        y[i] = y1[i];
-    }
-    free((void *)x1);
-    free((void *)y1);
+    fft_radix2_seq_(x, y, n, 1);
 }
 
 void ifft_radix2_seq(const Complex *y, Complex *x, int n) {
     /*
         Inversed Fast Fourier transform implementation - Cooley-Tukey algorithm
-        Wraps around ifft_radix2_seq_, work with any positive int n
         Expected complexity: O(nlogn)
     */
-
-    int n1 = 1;
-    while (n1 < n) {
-        n1 *= 2;
+    if ( n & (n-1) ) {
+        std::cerr << "Input size must be a power of 2" << std::endl;
+        return;
     }
-
-    Complex *x1 = (Complex *)std::malloc(n1 * sizeof(Complex));
-    Complex *y1 = (Complex *)std::malloc(n1 * sizeof(Complex));
-    for (int i = 0; i < n1; i++) {
-        y1[i] = (i < n) ? y[i] : 0.;
-    }
-    ifft_radix2_seq_(y1, x1, n1);
-    for (int i = 0; i < n; i++) {
-        x[i] = x1[i];
-    }
-    free((void *)x1);
-    free((void *)y1);
+    ifft_radix2_seq_(y, x, n, 1);
 }
