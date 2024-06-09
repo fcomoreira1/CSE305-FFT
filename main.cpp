@@ -7,6 +7,7 @@
 #include "utils.h"
 #include <iostream>
 
+int IntegersModP::p = 5;
 
 void test_compress() {
     std::string filename = "data/DailyDelhiClimateTrain.csv";
@@ -50,22 +51,23 @@ void run_benchmark_complex() {
         data_complex[i] = i < original_data.size() ? original_data[i] : 0;
     }
     std::cout << "Benchmark Baseline" << std::endl;
-    benchmark_fft<Complex>(data_complex, N, fft_baseline, ifft_baseline);
+    benchmark_fft(data_complex, N, fft_baseline, ifft_baseline);
     std::cout << "Benchmark Radix2" << std::endl;
-    benchmark_fft<Complex>(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
+    benchmark_fft(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
 }
 
 void run_benchmark_modp() {
     int N = 4;
-    std::cout << "Primitive root is: " << IntegersModP<p>::primitive_root() << std::endl;
-    IntegersModP<p> *data_modp = new IntegersModP<p>[N];
+    std::cout << "Primitive root is: " << IntegersModP::primitive_root()
+              << std::endl;
+    IntegersModP *data_modp = new IntegersModP[N];
     data_modp[0] = 1;
     data_modp[1] = 2;
-    data_modp[2] = 3; 
+    data_modp[2] = 3;
     data_modp[3] = 4;
-    IntegersModP<p> *data_coef = new IntegersModP<p>[N];
+    IntegersModP *data_coef = new IntegersModP[N];
     ntt_radix2_seq(data_modp, data_coef, N);
-    for (int i = 0 ; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         std::cout << data_coef[i] << " ";
     }
     std::cerr << std::endl;
@@ -76,9 +78,16 @@ void run_benchmark_modp() {
     std::cout << std::endl;
 }
 
+void run_benchmark_polmult() {
+    std::vector<int> P1;
+    std::vector<int> P2;
+    benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq);
+}
+
 int main() {
     // run_benchmark_complex();
     // test_compress();
     // test_primitive_root();
-    run_benchmark_modp();
+    // run_benchmark_modp();
+    run_benchmark_polmult();
 }

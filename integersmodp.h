@@ -1,8 +1,9 @@
 #pragma once
 #include <iostream>
 
-template <int p> class IntegersModP {
+class IntegersModP {
   public:
+    static int p;
     int val;
     IntegersModP() : val(0) {}
     IntegersModP(int value) : val(value % p) {
@@ -10,44 +11,44 @@ template <int p> class IntegersModP {
         if (val < 0)
             val += p;
     }
-    IntegersModP<p> &operator=(const IntegersModP<p> &other) {
+    IntegersModP &operator=(const IntegersModP &other) {
         if (this != &other) {
             val = other.val;
         }
         return *this;
     }
 
-    IntegersModP<p> operator+(const IntegersModP<p> &other) const {
-        return IntegersModP<p>((val + other.val) % p);
+    IntegersModP operator+(const IntegersModP &other) const {
+        return IntegersModP((val + other.val) % p);
     }
 
-    IntegersModP<p> operator-(const IntegersModP<p> &other) const {
-        return IntegersModP<p>((val - other.val + p) % p);
+    IntegersModP operator-(const IntegersModP &other) const {
+        return IntegersModP((val - other.val + p) % p);
     }
 
-    IntegersModP<p> operator*(const IntegersModP<p> &other) const {
-        return IntegersModP<p>((val * other.val) % p);
+    IntegersModP operator*(const IntegersModP &other) const {
+        return IntegersModP((val * other.val) % p);
     }
 
-    IntegersModP<p> operator/(const IntegersModP<p> &other) const {
-        return IntegersModP<p>((val * IntegersModP<p>::inverse(other).val) % p);
+    IntegersModP operator/(const IntegersModP &other) const {
+        return IntegersModP((val * IntegersModP::inverse(other).val) % p);
     }
 
-    bool operator==(const IntegersModP<p> &other) const {
+    bool operator==(const IntegersModP &other) const {
         return val == other.val;
     }
 
-    bool operator!=(const IntegersModP<p> &other) const {
+    bool operator!=(const IntegersModP &other) const {
         return val != other.val;
     }
     friend std::ostream &operator<<(std::ostream &os,
-                                    const IntegersModP<p> &obj) {
+                                    const IntegersModP &obj) {
         os << obj.val;
         return os;
     }
-    static IntegersModP<p> primitive_root();
-    static IntegersModP<p> pow(IntegersModP<p> n, int exp);
-    static IntegersModP<p> inverse(IntegersModP<p> n) { return pow(n, p - 2); }
+    static IntegersModP primitive_root();
+    static IntegersModP pow(IntegersModP n, int exp);
+    static IntegersModP inverse(IntegersModP n) { return pow(n, p - 2); }
 };
 void test_primitive_root();
 void test_pow();
