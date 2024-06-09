@@ -16,9 +16,13 @@ void compress_from_fft_sequential(
               [](std::pair<Complex, int> a, std::pair<Complex, int> b) {
                   return abs(a.first) > abs(b.first);
               });
-    for (int i = 0; i < size_compression; i++) {
-        compressed_data[i] = z[i];
+    for (int i = 0; i < n; i++) {
+        std::cout << abs(z[i].first) << " " << z[i].second << std::endl;
     }
+    for (int i = 0; i < size_compression; i++) {
+        compressed_data[i] = z[i]; 
+    }
+    std::cout << std::endl;
     delete[] data_coef;
     delete[] z;
 }

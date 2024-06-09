@@ -4,7 +4,7 @@
 #include <optional>
 #include <vector>
 
-template<>
+template<int p>
 IntegersModP<p> IntegersModP<p>::pow(IntegersModP<p> n, int exp) {
     if (exp % p == 0) {
         return IntegersModP<p>(0);
@@ -43,7 +43,7 @@ static std::vector<int> get_prime_divisors(int n) {
     return divisors;
 }
 
-template<>
+template<int p>
 IntegersModP<p> IntegersModP<p>::primitive_root() {
     static std::optional<IntegersModP<p>> omega;
     if (omega) {

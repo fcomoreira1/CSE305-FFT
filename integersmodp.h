@@ -1,10 +1,10 @@
 #pragma once
 #include <ostream>
 
-const int p = 17;
 template <int p> class IntegersModP {
   public:
     int val;
+    IntegersModP() : val(0) {}
     IntegersModP(int value) : val(value % p) {
         // Ensure non-negative value
         if (val < 0)
@@ -28,21 +28,6 @@ template <int p> class IntegersModP {
     IntegersModP<p> operator*(const IntegersModP<p> &other) const {
         return IntegersModP<p>((val * other.val) % p);
     }
-
-    // IntegersModP<p> &operator+=(const IntegersModP<p> &other) {
-    //     val = (val + other.val) % p;
-    //     return *this;
-    // }
-
-    // IntegersModP<p> &operator-=(const IntegersModP<p> &other) {
-    //     val = (val - other.val + p) % p;
-    //     return *this;
-    // }
-
-    // IntegersModP<p> &operator*=(const IntegersModP<p> &other) {
-    //     val = (val * other.val) % p;
-    //     return *this;
-    // }
 
     bool operator==(const IntegersModP<p> &other) const {
         return val == other.val;
