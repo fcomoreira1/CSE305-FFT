@@ -1,12 +1,12 @@
 #include "integersmodp.h"
+#include "types.h"
 #include <algorithm>
 #include <iostream>
 #include <optional>
-#include <vector>
 
 template<int p>
 IntegersModP<p> IntegersModP<p>::pow(IntegersModP<p> n, int exp) {
-    if (exp % p == 0) {
+    if (n == 0) {
         return IntegersModP<p>(0);
     }
     exp = ((exp % (p - 1)) + p - 1) % (p - 1);
@@ -14,6 +14,7 @@ IntegersModP<p> IntegersModP<p>::pow(IntegersModP<p> n, int exp) {
         std::cerr << "Negative exponent mod p" << std::endl;
         exit(-1);
     }
+    // return IntegersModP<p>(std::pow(n.val, exp));
     IntegersModP<p> res(1);
     auto x = n;
     while (exp > 0) {
@@ -25,6 +26,7 @@ IntegersModP<p> IntegersModP<p>::pow(IntegersModP<p> n, int exp) {
     }
     return res;
 }
+template IntegersModP<p> IntegersModP<p>::pow(IntegersModP<p> n, int exp);
 
 static std::vector<int> get_prime_divisors(int n) {
     std::vector<int> divisors;
@@ -39,7 +41,6 @@ static std::vector<int> get_prime_divisors(int n) {
     if (n != 1) {
         divisors.push_back(n);
     }
-    std::sort(divisors.begin(), divisors.end());
     return divisors;
 }
 
@@ -56,7 +57,7 @@ IntegersModP<p> IntegersModP<p>::primitive_root() {
         IntegersModP<p> i_modp(i);
         valid_root = true;
         for (auto q : prime_div) {
-            if (pow(i_modp, (p - 1) / q) == 1) {
+            if (pow(i_modp, (p - 1) / q).val == 1) {
                 valid_root = false;
                 break;
             }
@@ -68,3 +69,4 @@ IntegersModP<p> IntegersModP<p>::primitive_root() {
     }
     return *omega;
 }
+template IntegersModP<p> IntegersModP<p>::primitive_root();

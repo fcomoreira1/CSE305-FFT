@@ -22,7 +22,7 @@ Complex nth_primitive_root(int n) {
     return std::polar(1., 2. * M_PI / (double)n);
 }
 
-template <int p> IntegersModP<p> nth_primitive_root(int n) {
+IntegersModP<p> nth_primitive_root_modp(int n) {
     if ((p - 1) % n) {
         std::cerr << "p = " << p << ", n = " << n
                   << "n does not divide p-1, so there is no n-th primitive root"

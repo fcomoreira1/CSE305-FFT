@@ -1,5 +1,5 @@
 #pragma once
-#include <ostream>
+#include <iostream>
 
 template <int p> class IntegersModP {
   public:
@@ -29,6 +29,10 @@ template <int p> class IntegersModP {
         return IntegersModP<p>((val * other.val) % p);
     }
 
+    IntegersModP<p> operator/(const IntegersModP<p> &other) const {
+        return IntegersModP<p>((val * IntegersModP<p>::inverse(other).val) % p);
+    }
+
     bool operator==(const IntegersModP<p> &other) const {
         return val == other.val;
     }
@@ -46,3 +50,4 @@ template <int p> class IntegersModP {
     static IntegersModP<p> inverse(IntegersModP<p> n) { return pow(n, p - 2); }
 };
 void test_primitive_root();
+void test_pow();

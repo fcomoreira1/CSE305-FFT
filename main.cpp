@@ -2,9 +2,11 @@
 #include "compression.h"
 #include "fft.h"
 #include "integersmodp.h"
+#include "ntt.h"
 #include "parser.h"
 #include "utils.h"
 #include <iostream>
+
 
 void test_compress() {
     std::string filename = "data/DailyDelhiClimateTrain.csv";
@@ -18,7 +20,7 @@ void test_compress() {
     auto compressed_data = new std::pair<Complex, int>[size_compression];
     compress_from_fft_sequential(data_complex, N, compressed_data,
                                  size_compression, fft_radix2_seq);
-    for (int i = 0 ; i < size_compression; i++) {
+    for (int i = 0; i < size_compression; i++) {
         std::cout << compressed_data[i].second << " ";
     }
     Complex *decompressed_data = new Complex[N];
@@ -55,16 +57,28 @@ void run_benchmark_complex() {
 
 void run_benchmark_modp() {
     int N = 4;
-    const int p = 17;
+    std::cout << "Primitive root is: " << IntegersModP<p>::primitive_root() << std::endl;
     IntegersModP<p> *data_modp = new IntegersModP<p>[N];
-    for (int i = 0; i < N; i++) {
-        data_modp[i] = i;
+    data_modp[0] = 1;
+    data_modp[1] = 2;
+    data_modp[2] = 3; 
+    data_modp[3] = 4;
+    IntegersModP<p> *data_coef = new IntegersModP<p>[N];
+    ntt_radix2_seq(data_modp, data_coef, N);
+    for (int i = 0 ; i < N; i++) {
+        std::cout << data_coef[i] << " ";
     }
+    std::cerr << std::endl;
+    intt_radix2_seq(data_coef, data_modp, N);
+    for (int i = 0; i < N; i++) {
+        std::cout << data_modp[i] << " ";
+    }
+    std::cout << std::endl;
 }
 
 int main() {
     // run_benchmark_complex();
-    test_compress();
+    // test_compress();
     // test_primitive_root();
-    // run_benchmark_modp();
+    run_benchmark_modp();
 }
