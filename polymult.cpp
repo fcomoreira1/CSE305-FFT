@@ -17,14 +17,22 @@ std::vector<int> polmult_baseline(std::vector<int> P1, std::vector<int> P2) {
     return res;
 }
 
+static int max_abs_value(std::vector<int> &P) {
+    int m = 0;
+    for (int i = 0; i < P.size(); i++) {
+        m = std::max(m, std::abs(P[i]));
+    }
+    return m;
+}
+
 std::vector<int> polmult_ntt(
     std::vector<int> P1, std::vector<int> P2,
     std::function<void(const IntegersModP *, IntegersModP *, int)> ntt,
     std::function<void(const IntegersModP *, IntegersModP *, int)> intt) {
     int N = pow2greater(P1.size() + P2.size());
-    int m = std::max(*std::max_element(P1.begin(), P1.end()),
-                     *std::max_element(P2.begin(), P2.end()));
+    int m = std::max(max_abs_value(P1), max_abs_value(P2));
     IntegersModP::p = prime_arithmetic_sequence(N, N * m * m + 1);
+    // std::cout << "Found prime: " << IntegersModP::p << std::endl;
     auto p1 = new IntegersModP[N];
     auto p2 = new IntegersModP[N];
     for (int i = 0; i < N; i++) {
@@ -58,7 +66,10 @@ std::vector<int> polmult_ntt(
     }
     std::vector<int> res_vec(N);
     for (int i = 0; i < N; i++) {
-        res_vec[i] = res[i].val;
+        res_vec[i] = res[i].get_val();
+        if (res_vec[i] >= IntegersModP::p / 2) {
+            res_vec[i] -= IntegersModP::p;
+        }
     }
     delete[] p1;
     delete[] p2;

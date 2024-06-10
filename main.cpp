@@ -49,7 +49,7 @@ void run_benchmark_complex() {
     int N = 1 << 24;
     Complex *data_complex = new Complex[N];
     for (int i = 0; i < N; i++) {
-        data_complex[i] = rand()/ double(RAND_MAX);
+        data_complex[i] = rand() / double(RAND_MAX);
     }
     std::cout << "Benchmark Baseline" << std::endl;
     benchmark_fft(data_complex, N, fft_baseline, ifft_baseline);
@@ -59,11 +59,11 @@ void run_benchmark_complex() {
 
 void test_ntt_modp() {
     std::cout << "Starting random test" << std::endl;
-    for (unsigned long N = 2; N < (1 << 20); N *= 2){
-        std::cout << "Starting iteration for N = " << N << std::endl; 
-        IntegersModP::p = prime_arithmetic_sequence(N, (N * (rand() % 16 + 10)) + 1);
+    for (unsigned long N = 2; N < (1 << 20); N *= 2) {
+        std::cout << "Starting iteration for N = " << N << std::endl;
+        IntegersModP::p = prime_arithmetic_sequence(N, N + 1);
 
-        std::cout << "Found prime: " << IntegersModP::p <<  std::endl;
+        std::cout << "Found prime: " << IntegersModP::p << std::endl;
         IntegersModP *data_modp = new IntegersModP[N];
         IntegersModP *data_coef = new IntegersModP[N];
         IntegersModP *z = new IntegersModP[N];
@@ -84,15 +84,45 @@ void test_ntt_modp() {
 void run_benchmark_polmult() {
     std::vector<int> P1;
     std::vector<int> P2;
-    for (unsigned long N = 1; N < (1 << 18); N *= 2) {
+    for (unsigned long N = 8; N < (1 << 12); N *= 2) {
         P1.resize(N);
         P2.resize(N);
-        std::cout << "Benchmarking Polynomial for N = " << N << std::endl;
+        std::cout << "Benchmarking Polynomial for N = " << N
+                  << " and sequential processing" << std::endl;
         for (int i = 0; i < N; i++) {
-            P1[i] = rand() % 10;
-            P2[i] = rand() % 10;
+            P1[i] = rand() % 20 - 10;
+            P2[i] = rand() % 10 - 10;
         }
-        benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq, fft_radix2_seq, ifft_radix2_seq);
+        // std::cout << "P1: ";
+        // for (int i = 0; i < N; i++) {
+        //     std::cout << P1[i] << " ";
+        // }
+        // std::cout << std::endl;
+        // std::cout << "P2: ";
+        for (int i = 0; i < N; i++) {
+            std::cout << P2[i] << " ";
+        }
+        std::cout << std::endl;
+        benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq,
+                          fft_radix2_seq, ifft_radix2_seq);
+        std::cout << "Benchmarking Polynomial for N = " << N
+                  << " and DAC parallel processing" << std::endl;
+        benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq,
+                          fft_radix2_parallel_dac, ifft_radix2_parallel_dac);
+        std::vector<int> n_threads{2, 4, 8};
+        for (auto num_threads : n_threads) {
+            std::cout << "Benchmarking Polynomial for N = " << N << " with "
+                      << num_threads << " threads" << std::endl;
+            auto fft_our = [&num_threads](const Complex *x, Complex *y, int n) {
+                fft_radix2_parallel_our(x, y, n, num_threads);
+            };
+            auto ifft_our = [&num_threads](const Complex *y, Complex *x,
+                                           int n) {
+                ifft_radix2_parallel_our(y, x, n, num_threads);
+            };
+            benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq, fft_our,
+                              ifft_our);
+        }
         P1.clear();
         P2.clear();
     }
@@ -105,7 +135,7 @@ void run_benchmark_complex_extensive() {
     int N = 1 << 10;
     Complex *data_complex = new Complex[N];
     for (int i = 0; i < N; i++) {
-        data_complex[i] = rand()/ double(RAND_MAX);
+        data_complex[i] = rand() / double(RAND_MAX);
     }
     // for (int i = 0; i < N; i++) {
     //     data_complex[i] = i < original_data.size() ? original_data[i] : 0;
@@ -115,29 +145,29 @@ void run_benchmark_complex_extensive() {
     std::cout << "Benchmark Radix2" << std::endl;
     benchmark_fft(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
     std::cout << std::endl;
-    
+
     std::cout << "Benchmark parallel baseline" << std::endl;
-    benchmark_fft(data_complex, N, fft_radix2_parallel_dac, ifft_radix2_parallel_dac);
+    benchmark_fft(data_complex, N, fft_radix2_parallel_dac,
+                  ifft_radix2_parallel_dac);
     std::cout << std::endl;
 
     std::cout << "Benchmark parallel parallel 2" << std::endl;
     const int num_threads1 = 2;
-    auto fft_ours1 = [](const Complex *x, Complex *y, int n){
+    auto fft_ours1 = [](const Complex *x, Complex *y, int n) {
         fft_radix2_parallel_our(x, y, n, num_threads1);
     };
-    auto ifft_ours1 = [](const Complex *y, Complex *x, int n){
+    auto ifft_ours1 = [](const Complex *y, Complex *x, int n) {
         ifft_radix2_parallel_our(y, x, n, num_threads1);
     };
     benchmark_fft(data_complex, N, fft_ours1, ifft_ours1);
     std::cout << std::endl;
 
-
     std::cout << "Benchmark parallel parallel 4" << std::endl;
     const int num_threads2 = 4;
-    auto fft_ours2 = [](const Complex *x, Complex *y, int n){
+    auto fft_ours2 = [](const Complex *x, Complex *y, int n) {
         fft_radix2_parallel_our(x, y, n, num_threads2);
     };
-    auto ifft_ours2 = [](const Complex *y, Complex *x, int n){
+    auto ifft_ours2 = [](const Complex *y, Complex *x, int n) {
         ifft_radix2_parallel_our(y, x, n, num_threads2);
     };
     benchmark_fft(data_complex, N, fft_ours2, ifft_ours2);
@@ -145,10 +175,10 @@ void run_benchmark_complex_extensive() {
 
     std::cout << "Benchmark parallel parallel 8" << std::endl;
     const int num_threads3 = 8;
-    auto fft_ours3 = [](const Complex *x, Complex *y, int n){
+    auto fft_ours3 = [](const Complex *x, Complex *y, int n) {
         fft_radix2_parallel_our(x, y, n, num_threads3);
     };
-    auto ifft_ours3 = [](const Complex *y, Complex *x, int n){
+    auto ifft_ours3 = [](const Complex *y, Complex *x, int n) {
         ifft_radix2_parallel_our(y, x, n, num_threads3);
     };
     benchmark_fft(data_complex, N, fft_ours3, ifft_ours3);
@@ -160,5 +190,6 @@ int main() {
     // test_compress();
     // test_primitive_root();
     // test_ntt_modp();
-    run_benchmark_complex_extensive();
+    // run_benchmark_complex_extensive();
+    run_benchmark_polmult();
 }

@@ -76,4 +76,4 @@ IntegersModP nth_primitive_root_modp(int n) {
     }
     return IntegersModP::pow(IntegersModP::primitive_root(), (p - 1) / n);
 }
-double abs(const IntegersModP a) { return a.val; }
+double abs(const IntegersModP a) { return a.get_val(); }

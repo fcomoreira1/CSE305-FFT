@@ -32,16 +32,16 @@ void benchmark_fft(Complex *data, int n,
     for (int i = 0; i < n; i++) {
         if (abs(z[i] - data[i]) > 1e-9) {
             flag_correct = 0;
-            std::cout << "Error in fft at ind: " << i
-                      << ", got " << z[i] << " instead of " << data[i] << std::endl;
+            std::cout << "Error in fft at ind: " << i << ", got " << z[i]
+                      << " instead of " << data[i] << std::endl;
         }
     }
     if (flag_correct) {
-        std::cout << "FFT WORKS!" << std::endl; 
+        std::cout << "FFT WORKS!" << std::endl;
     } else {
-        std::cout << "It doesn't" << std::endl; 
+        std::cout << "It doesn't" << std::endl;
     }
-    
+
     delete[] data_coef;
     delete[] z;
 }
@@ -67,7 +67,7 @@ void benchmark_ntt(
     const std::chrono::duration<double, std::milli> elapsed_seconds{end -
                                                                     start};
     for (int i = 0; i < n; i++) {
-        if ((z[i] - data[i]).val > 1e-3) {
+        if ((z[i] - data[i]).get_val() > 1e-3) {
             std::cout << "Error in fft: " << i << std::endl;
         }
     }
@@ -135,5 +135,5 @@ void benchmark_polmult(
     // for (int i = 0; i < res_ntt.size(); i++) {
     //     std::cout << res_ntt[i] << " ";
     // }
-    std::cout << std::endl;
+    // std::cout << std::endl;
 }

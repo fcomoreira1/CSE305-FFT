@@ -2,14 +2,15 @@
 #include <iostream>
 
 class IntegersModP {
+    long long val;
+
   public:
     static int p;
-    long long val;
     IntegersModP() : val(0) {}
     IntegersModP(int value) : val(value % p) {
-        // Ensure non-negative value
-        if (val < 0)
+        if (val < 0) {
             val += p;
+        }
     }
     IntegersModP &operator=(const IntegersModP &other) {
         if (this != &other) {
@@ -17,13 +18,14 @@ class IntegersModP {
         }
         return *this;
     }
+    int get_val() const { return val; }
 
     IntegersModP operator+(const IntegersModP &other) const {
         return IntegersModP((val + other.val) % p);
     }
 
     IntegersModP operator-(const IntegersModP &other) const {
-        return IntegersModP((val - other.val + p) % p);
+        return IntegersModP((val - other.val) % p);
     }
 
     IntegersModP operator*(const IntegersModP &other) const {
@@ -41,14 +43,13 @@ class IntegersModP {
     bool operator!=(const IntegersModP &other) const {
         return val != other.val;
     }
-    friend std::ostream &operator<<(std::ostream &os,
-                                    const IntegersModP &obj) {
+    friend std::ostream &operator<<(std::ostream &os, const IntegersModP &obj) {
         os << obj.val;
         return os;
     }
     static IntegersModP primitive_root();
     static IntegersModP pow(IntegersModP n, int exp);
-    static IntegersModP inverse(IntegersModP n); 
+    static IntegersModP inverse(IntegersModP n);
 };
 void test_primitive_root();
 void test_pow();
