@@ -1,5 +1,5 @@
-#include <functional>
 #include <complex>
+#include <functional>
 
 typedef std::complex<double> Complex;
 
@@ -13,11 +13,12 @@ typedef std::complex<double> Complex;
  * @param fft: desired FFT function
  * @param ifft: inverse FFT function
  */
-void compress_from_fft_sequential(
-    Complex *data, int n, std::pair<Complex, int> *compressed_data, int size_compression,
+void compress_from_fft(
+    Complex *data, int n, std::pair<Complex, int> *compressed_data,
+    int size_compression,
     std::function<void(const Complex *, Complex *, int)> fft);
 
-void decompress_from_fft_sequential (
-    std::pair<Complex, int> *compressed_data, int size_compression, 
+void decompress_from_fft(
+    std::pair<Complex, int> *compressed_data, int size_compression,
     Complex *decompressed_data, int n,
-    std::function<void (const Complex *, Complex *, int)> ifft); 
+    std::function<void(const Complex *, Complex *, int)> ifft);

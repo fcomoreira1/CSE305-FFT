@@ -19,14 +19,19 @@ void test_compress() {
     }
     int size_compression = 20;
     auto compressed_data = new std::pair<Complex, int>[size_compression];
-    compress_from_fft_sequential(data_complex, N, compressed_data,
-                                 size_compression, fft_radix2_seq);
+    auto fft = [](const Complex *x, Complex *y, int n) {
+        fft_radix2_parallel_our(x, y, n, 8);
+    };
+    auto ifft = [](const Complex *x, Complex *y, int n) {
+        ifft_radix2_parallel_our(x, y, n, 8);
+    };
+    compress_from_fft(data_complex, N, compressed_data, size_compression, fft);
     for (int i = 0; i < size_compression; i++) {
         std::cout << compressed_data[i].second << " ";
     }
     Complex *decompressed_data = new Complex[N];
-    decompress_from_fft_sequential(compressed_data, size_compression,
-                                   decompressed_data, N, ifft_radix2_seq);
+    decompress_from_fft(compressed_data, size_compression, decompressed_data, N,
+                        ifft);
     std::vector<double> real_decompressed_data(original_data.size());
     for (int i = 0; i < real_decompressed_data.size(); i++) {
         real_decompressed_data[i] = decompressed_data[i].real();
