@@ -3,7 +3,7 @@
 #include <cstring>
 #include <iostream>
 
-void compress_from_fft_sequential(
+void compress_from_fft(
     Complex *data, int n, std::pair<Complex, int> *compressed_data,
     int size_compression,
     std::function<void(const Complex *, Complex *, int)> fft) {
@@ -29,7 +29,7 @@ void compress_from_fft_sequential(
     delete[] z;
 }
 
-void decompress_from_fft_sequential(
+void decompress_from_fft(
     std::pair<Complex, int> *compressed_data, int size_compression,
     Complex *decompressed_data, int n,
     std::function<void(const Complex *, Complex *, int)> ifft) {

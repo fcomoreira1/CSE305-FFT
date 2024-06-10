@@ -134,36 +134,38 @@ void run_benchmark_polmult() {
 }
 
 void run_benchmark_modp_extensive() {
-    int N = 1 << 25;
-    IntegersModP::p = prime_arithmetic_sequence(N, N + 1);
-    auto *data_modp = new IntegersModP[N];
-    for (int i = 0; i < N; i++) {
-        data_modp[i] = rand() % 10;
-    }
-    if (N < 1e5) {
-        std::cout << "Benchmark Baseline" << std::endl;
-        benchmark_ntt(data_modp, N, ntt_baseline, intt_baseline);
-    }
-    std::cout << "Benchmark Radix2" << std::endl;
-    benchmark_ntt(data_modp, N, ntt_radix2_seq, intt_radix2_seq);
-    std::cout << std::endl;
-
-    std::cout << "Benchmark parallel baseline" << std::endl;
-    benchmark_ntt(data_modp, N, ntt_radix2_parallel_dac,
-                  intt_radix2_parallel_dac);
-    std::cout << std::endl;
-
-    std::vector<int> num_threads{2, 4, 8};
-    for (auto t : num_threads) {
-        std::cout << "Benchmark parallel parallel " << t << std::endl;
-        auto ntt_ours1 = [&t](const IntegersModP *x, IntegersModP *y, int n) {
-            ntt_radix2_parallel_our(x, y, n, t);
-        };
-        auto intt_ours1 = [&t](const IntegersModP *y, IntegersModP *x, int n) {
-            intt_radix2_parallel_our(y, x, n, t);
-        };
-        benchmark_ntt(data_modp, N, ntt_ours1, intt_ours1);
+    for (int N = 1 << 12; N <= 1 << 26; N *= 2) { 
+        std::cout << "Using N = " << N << std::endl;
+        IntegersModP::p = prime_arithmetic_sequence(N, N + 1);
+        auto *data_modp = new IntegersModP[N];
+        for (int i = 0; i < N; i++) {
+            data_modp[i] = rand() % 10;
+        }
+        if (N < 1e5) {
+            std::cout << "Benchmark Baseline" << std::endl;
+            benchmark_ntt(data_modp, N, ntt_baseline, intt_baseline);
+        }
+        std::cout << "Benchmark Radix2" << std::endl;
+        benchmark_ntt(data_modp, N, ntt_radix2_seq, intt_radix2_seq);
         std::cout << std::endl;
+
+        std::cout << "Benchmark parallel baseline" << std::endl;
+        benchmark_ntt(data_modp, N, ntt_radix2_parallel_dac,
+                    intt_radix2_parallel_dac);
+        std::cout << std::endl;
+
+        std::vector<int> num_threads{2, 4, 8, 16};
+        for (auto t : num_threads) {
+            std::cout << "Benchmark parallel parallel " << t << std::endl;
+            auto ntt_ours1 = [&t](const IntegersModP *x, IntegersModP *y, int n) {
+                ntt_radix2_parallel_our(x, y, n, t);
+            };
+            auto intt_ours1 = [&t](const IntegersModP *y, IntegersModP *x, int n) {
+                intt_radix2_parallel_our(y, x, n, t);
+            };
+            benchmark_ntt(data_modp, N, ntt_ours1, intt_ours1);
+            std::cout << std::endl;
+        }
     }
 }
 void run_benchmark_complex_extensive() {
@@ -173,35 +175,37 @@ void run_benchmark_complex_extensive() {
     // for (int i = 0; i < N; i++) {
     //     data_complex[i] = i < original_data.size() ? original_data[i] : 0;
     // }
-    int N = 1 << 26;
-    Complex *data_complex = new Complex[N];
-    for (int i = 0; i < N; i++) {
-        data_complex[i] = rand() / double(RAND_MAX);
-    }
-    if (N < 1e5) {
-        std::cout << "Benchmark Baseline" << std::endl;
-        benchmark_fft(data_complex, N, fft_baseline, ifft_baseline);
-    }
-    std::cout << "Benchmark Radix2" << std::endl;
-    benchmark_fft(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
-    std::cout << std::endl;
-
-    std::cout << "Benchmark parallel baseline" << std::endl;
-    benchmark_fft(data_complex, N, fft_radix2_parallel_dac,
-                  ifft_radix2_parallel_dac);
-    std::cout << std::endl;
-
-    std::vector<int> num_threads{2, 4, 8};
-    for (auto t : num_threads) {
-        std::cout << "Benchmark parallel parallel " << t << std::endl;
-        auto fft_ours1 = [t](const Complex *x, Complex *y, int n) {
-            fft_radix2_parallel_our(x, y, n, t);
-        };
-        auto ifft_ours1 = [t](const Complex *y, Complex *x, int n) {
-            ifft_radix2_parallel_our(y, x, n, t);
-        };
-        benchmark_fft(data_complex, N, fft_ours1, ifft_ours1);
+    for (int N = 1 << 12; N <= 1 << 26; N *= 2) {
+        std::cout << "Using N = " << N << std::endl;
+        Complex *data_complex = new Complex[N];
+        for (int i = 0; i < N; i++) {
+            data_complex[i] = rand() / double(RAND_MAX);
+        }
+        if (N < 1e5) {
+            std::cout << "Benchmark Baseline" << std::endl;
+            benchmark_fft(data_complex, N, fft_baseline, ifft_baseline);
+        }
+        std::cout << "Benchmark Radix2" << std::endl;
+        benchmark_fft(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
         std::cout << std::endl;
+
+        std::cout << "Benchmark parallel baseline" << std::endl;
+        benchmark_fft(data_complex, N, fft_radix2_parallel_dac,
+                    ifft_radix2_parallel_dac);
+        std::cout << std::endl;
+
+        std::vector<int> num_threads{2, 4, 8, 16};
+        for (auto t : num_threads) {
+            std::cout << "Benchmark parallel parallel " << t << std::endl;
+            auto fft_ours1 = [t](const Complex *x, Complex *y, int n) {
+                fft_radix2_parallel_our(x, y, n, t);
+            };
+            auto ifft_ours1 = [t](const Complex *y, Complex *x, int n) {
+                ifft_radix2_parallel_our(y, x, n, t);
+            };
+            benchmark_fft(data_complex, N, fft_ours1, ifft_ours1);
+            std::cout << std::endl;
+        }
     }
 }
 
