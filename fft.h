@@ -9,3 +9,5 @@ void fft_radix2_seq_(const Complex *x, Complex *y, int n, int d = 1);
 void ifft_radix2_seq_(const Complex *y, Complex *x, int n, int d = 1);
 void fft_radix2_seq(const Complex *x, Complex *y, int n);
 void ifft_radix2_seq(const Complex *y, Complex *x, int n);
+void fft_radix2_parallel_baseline(const Complex *x, Complex *y, int n, int d = 1);
+void ifft_radix2_parallel_baseline(const Complex *x, Complex *y, int n, int d = 1);
