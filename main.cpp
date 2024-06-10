@@ -51,16 +51,17 @@ void run_benchmark_complex() {
         data_complex[i] = i < original_data.size() ? original_data[i] : 0;
     }
     std::cout << "Benchmark Baseline" << std::endl;
-    benchmark_fft_seq(data_complex, N, fft_baseline, ifft_baseline);
+    benchmark_fft(data_complex, N, fft_baseline, ifft_baseline);
     std::cout << "Benchmark Radix2" << std::endl;
-    benchmark_fft_seq(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
+    benchmark_fft(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
 }
 
 void test_ntt_modp() {
     std::cout << "Starting random test" << std::endl;
     for (unsigned long N = 2; N < (1 << 20); N *= 2){
         std::cout << "Starting iteration for N = " << N << std::endl; 
-        IntegersModP::p = prime_arithmetic_seq(N, N + 1);
+        IntegersModP::p = prime_arithmetic_sequence(N, (N * (rand() % 16 + 10)) + 1);
+
         std::cout << "Found prime: " << IntegersModP::p <<  std::endl;
         IntegersModP *data_modp = new IntegersModP[N];
         IntegersModP *data_coef = new IntegersModP[N];
@@ -82,15 +83,15 @@ void test_ntt_modp() {
 void run_benchmark_polmult() {
     std::vector<int> P1;
     std::vector<int> P2;
-    for (unsigned long N = 1; N < (1 << 12); N *= 2) {
+    for (unsigned long N = 1; N < (1 << 18); N *= 2) {
         P1.resize(N);
         P2.resize(N);
         std::cout << "Benchmarking Polynomial for N = " << N << std::endl;
         for (int i = 0; i < N; i++) {
-            P1[i] = rand() % 100;
-            P2[i] = rand() % 100;
+            P1[i] = rand() % 10;
+            P2[i] = rand() % 10;
         }
-        benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq);
+        benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq, fft_radix2_seq, ifft_radix2_seq);
         P1.clear();
         P2.clear();
     }

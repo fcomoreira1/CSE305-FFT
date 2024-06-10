@@ -40,21 +40,25 @@ std::vector<int> get_prime_divisors(int n) {
  * @brief Returns a prime that is of the form kn + 1
  *        at least min_p
  */
-u_long prime_arithmetic_seq(int n, u_long min_p) {
+u_long prime_arithmetic_sequence(int n, u_long min_p) {
     if (min_p % n != 1) {
         std::cerr << "Cannot use such min_p as a bound"
                   << "n= " << n << " min_p " << min_p << std::endl;
         exit(-1);
     }
     u_long next_term = min_p;
+    bool found = true;
     while (next_term < ULONG_MAX) {
+        found = true;
         for (int i = 2; i * i <= next_term; i++) {
             if (next_term % i == 0){
+                found = false;
                 next_term += n;
-                continue;
+                break;
             }
         }
-        return next_term;
+        if (found)
+            return next_term;
     }
     std::cerr <<  "Couldnt find an integer";
     exit(-1);
