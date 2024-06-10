@@ -38,19 +38,24 @@ std::vector<int> get_prime_divisors(int n) {
  * @brief Returns a prime that is of the form kn + 1
  *        at least min_p
  */
-int prime_arithmetic_seq(int n, int min_p) {
+u_long prime_arithmetic_seq(int n, u_long min_p) {
     if (min_p % n != 1) {
         std::cerr << "Cannot use such min_p as a bound"
                   << "n= " << n << " min_p " << min_p << std::endl;
         exit(-1);
     }
-    unsigned int next_term = min_p;
-    while (next_term < UINT_MAX) {
-        if (get_prime_divisors(next_term)[0] == next_term)
-            return next_term;
-        next_term += n;
+    u_long next_term = min_p;
+    while (next_term < ULONG_MAX) {
+        for (int i = 2; i * i <= next_term; i++) {
+            if (next_term % i == 0){
+                next_term += n;
+                continue;
+            }
+        }
+        return next_term;
     }
-    return -1;
+    std::cerr <<  "Couldnt find an integer";
+    exit(-1);
 }
 
 Complex nth_primitive_root(int n) {

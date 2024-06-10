@@ -2,6 +2,7 @@
 #include "integersmodp.h"
 #include "utils.h"
 #include <algorithm>
+#include <chrono>
 
 std::vector<int> polmult_baseline(std::vector<int> P1, std::vector<int> P2) {
     int N = P1.size() + P2.size();
@@ -33,16 +34,30 @@ std::vector<int> polmult_ntt(
 
     auto p1_coef = new IntegersModP[N];
     auto p2_coef = new IntegersModP[N];
-    ntt(p1, p1_coef, N);
-    ntt(p2, p2_coef, N);
+    {
+        auto start = std::chrono::steady_clock::now();
+        ntt(p1, p1_coef, N);
+        ntt(p2, p2_coef, N);
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double, std::milli> elapsed_seconds{end - start};
+        std::cout << "Elapsed time for ntt: " << elapsed_seconds.count() << "ms"
+                  << std::endl;
+    }
     auto res_coef = new IntegersModP[N];
     auto res = new IntegersModP[N];
     for (int i = 0; i < N; i++) {
         res_coef[i] = p1_coef[i] * p2_coef[i];
     }
-    intt(res_coef, res, N);
+    {
+        auto start = std::chrono::steady_clock::now();
+        auto end = std::chrono::steady_clock::now();
+        intt(res_coef, res, N);
+        std::chrono::duration<double, std::milli> elapsed_seconds{end - start};
+        std::cout << "Elapsed time for intt: " << elapsed_seconds.count() << "ms"
+                  << std::endl;
+    }
     std::vector<int> res_vec(N);
-    for(int i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
         res_vec[i] = res[i].val;
     }
     delete[] p1;

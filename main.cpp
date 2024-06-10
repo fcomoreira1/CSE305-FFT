@@ -56,38 +56,51 @@ void run_benchmark_complex() {
     benchmark_fft(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
 }
 
-void run_benchmark_modp() {
-    int N = 4;
-    std::cout << "Primitive root is: " << IntegersModP::primitive_root()
-              << std::endl;
-    IntegersModP *data_modp = new IntegersModP[N];
-    data_modp[0] = 1;
-    data_modp[1] = 2;
-    data_modp[2] = 3;
-    data_modp[3] = 4;
-    IntegersModP *data_coef = new IntegersModP[N];
-    ntt_radix2_seq(data_modp, data_coef, N);
-    for (int i = 0; i < N; i++) {
-        std::cout << data_coef[i] << " ";
+void test_ntt_modp() {
+    std::cout << "Starting random test" << std::endl;
+    for (unsigned long N = 2; N < (1 << 20); N *= 2){
+        std::cout << "Starting iteration for N = " << N << std::endl; 
+        IntegersModP::p = prime_arithmetic_seq(N, N + 1);
+        std::cout << "Found prime: " << IntegersModP::p <<  std::endl;
+        IntegersModP *data_modp = new IntegersModP[N];
+        IntegersModP *data_coef = new IntegersModP[N];
+        IntegersModP *z = new IntegersModP[N];
+        for (int i = 0; i < N; i++) {
+            data_modp[i] = rand();
+        }
+        ntt_radix2_seq(data_modp, data_coef, N);
+        intt_radix2_seq(data_coef, z, N);
+        for (int i = 0; i < N; i++) {
+            if (z[i] != data_modp[i]) {
+                std::cout << "Error in NTT for index " << i << std::endl;
+            }
+            // std::cout << data_modp[i] << " ";
+        }
     }
-    std::cerr << std::endl;
-    intt_radix2_seq(data_coef, data_modp, N);
-    for (int i = 0; i < N; i++) {
-        std::cout << data_modp[i] << " ";
-    }
-    std::cout << std::endl;
 }
 
 void run_benchmark_polmult() {
     std::vector<int> P1;
     std::vector<int> P2;
-    benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq);
+    for (unsigned long N = 1; N < (1 << 12); N *= 2) {
+        P1.resize(N);
+        P2.resize(N);
+        std::cout << "Benchmarking Polynomial for N = " << N << std::endl;
+        for (int i = 0; i < N; i++) {
+            P1[i] = rand() % 100;
+            P2[i] = rand() % 100;
+        }
+        benchmark_polmult(P1, P2, ntt_radix2_seq, intt_radix2_seq);
+        P1.clear();
+        P2.clear();
+    }
+    
 }
 
 int main() {
     // run_benchmark_complex();
     // test_compress();
     // test_primitive_root();
-    // run_benchmark_modp();
+    // test_ntt_modp();
     run_benchmark_polmult();
 }

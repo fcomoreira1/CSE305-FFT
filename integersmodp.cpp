@@ -13,7 +13,6 @@ IntegersModP IntegersModP::pow(IntegersModP n, int exp) {
         std::cerr << "Negative exponent mod p" << std::endl;
         exit(-1);
     }
-    // return IntegersModP(std::pow(n.val, exp));
     IntegersModP res(1);
     auto x = n;
     while (exp > 0) {
@@ -26,13 +25,12 @@ IntegersModP IntegersModP::pow(IntegersModP n, int exp) {
     return res;
 }
 
-
 IntegersModP IntegersModP::primitive_root() {
-    static std::optional<IntegersModP> omega;
-    if (omega) {
-        std::cout << "aaa";
-        return *omega;
+    static std::optional<std::pair<IntegersModP, int>> omega;
+    if (omega && omega->second == p) {
+        return omega->first;
     }
+
     std::vector<int> prime_div = get_prime_divisors(p - 1);
     bool valid_root;
     for (int i = 2; i < p; i++) {
@@ -45,9 +43,28 @@ IntegersModP IntegersModP::primitive_root() {
             }
         }
         if (valid_root) {
-            *omega = i_modp;
+            omega = std::make_pair(i_modp, p);
             break;
         }
     }
-    return *omega;
+    return omega->first;
+}
+
+static int gcd(int a, int b, int &x, int &y) {
+    if (a == 0) {
+        x = 0;
+        y = 1;
+        return b;
+    }
+    int x1, y1;
+    int _gcd = gcd(b % a, a, x1, y1);
+    x = y1 - (b / a) * x1;
+    y = x1;
+    return _gcd;
+}
+
+IntegersModP IntegersModP::inverse(IntegersModP n){
+    int x, y;
+    gcd(n.val, p, x, y);
+    return x;
 }

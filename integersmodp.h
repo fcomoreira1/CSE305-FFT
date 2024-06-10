@@ -4,7 +4,7 @@
 class IntegersModP {
   public:
     static int p;
-    int val;
+    long long val;
     IntegersModP() : val(0) {}
     IntegersModP(int value) : val(value % p) {
         // Ensure non-negative value
@@ -48,7 +48,7 @@ class IntegersModP {
     }
     static IntegersModP primitive_root();
     static IntegersModP pow(IntegersModP n, int exp);
-    static IntegersModP inverse(IntegersModP n) { return pow(n, p - 2); }
+    static IntegersModP inverse(IntegersModP n); 
 };
 void test_primitive_root();
 void test_pow();

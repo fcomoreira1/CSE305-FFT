@@ -82,16 +82,16 @@ void benchmark_polmult(
     elapsed_seconds = end - start;
     std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
               << std::endl;
-    for (int i = 0; i < res_ntt.size(); i++) {
+    for (int i = 0; i < res_baseline.size(); i++) {
         if (res_ntt[i] != res_baseline[i]) {
             std::cout << "Polynomial multiplication failed at index " << i
                       << std::endl;
         }
     }
 
-    std::cout << "Resulting polynomial is: " << std::endl;
-    for (int i = 0; i < res_ntt.size(); i++) {
-        std::cout << res_ntt[i] << " ";
-    }
+    // std::cout << "Resulting polynomial is: " << std::endl;
+    // for (int i = 0; i < res_ntt.size(); i++) {
+    //     std::cout << res_ntt[i] << " ";
+    // }
     std::cout << std::endl;
 }
