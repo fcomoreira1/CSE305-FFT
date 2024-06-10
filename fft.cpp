@@ -129,10 +129,11 @@ void ifft_radix2_seq(const Complex *y, Complex *x, int n) {
     ifft_radix2_seq_(y, x, n, 1);
 }
 
-void fft_radix2_parallel_baseline(const Complex *x, Complex *y, int n, int d) {
+void fft_radix2_parallel_dac_(const Complex *x, Complex *y, int n, int d) {
     /*
         Fast Fourier transform implementation - Cooley-Tukey algorithm
         Baseline algorithm with minimal change
+        Underscore means inner fucntion
         Expected complexity: close to O(n)
         Input x, output y, length n being powers of 2.
             d is the step size (for input x only), default to 1
@@ -142,8 +143,8 @@ void fft_radix2_parallel_baseline(const Complex *x, Complex *y, int n, int d) {
     if (n <= 1024) {return fft_radix2_seq_(x, y, n, d);}
 
     // Recursive calls
-    std::thread subthread = std::thread(&fft_radix2_parallel_baseline, x, y, n/2, 2*d);
-    fft_radix2_parallel_baseline(x + d, y + n / 2, n / 2, 2 * d);
+    std::thread subthread = std::thread(&fft_radix2_parallel_dac_, x, y, n/2, 2*d);
+    fft_radix2_parallel_dac_(x + d, y + n / 2, n / 2, 2 * d);
     subthread.join();
 
     // Merging
@@ -159,10 +160,11 @@ void fft_radix2_parallel_baseline(const Complex *x, Complex *y, int n, int d) {
     }
 }
 
-void ifft_radix2_parallel_baseline(const Complex *y, Complex *x, int n, int d) {
+void ifft_radix2_parallel_dac_(const Complex *y, Complex *x, int n, int d) {
     /*
         Inversed Fast Fourier transform implementation - Cooley-Txukey algorithm
         Baseline algorithm with minimal change
+        Underscore means inner function
         Expected complexity: close to O(n)
         Input x, output y, length n being powers of 2.
             d is the step size (for input x only), default to 1
@@ -172,8 +174,8 @@ void ifft_radix2_parallel_baseline(const Complex *y, Complex *x, int n, int d) {
     if (n <= 1024) {return ifft_radix2_seq_(y, x, n, d);}
 
     // Recursive calls
-    std::thread subthread = std::thread(&ifft_radix2_parallel_baseline, y, x, n/2, 2*d);
-    ifft_radix2_parallel_baseline(y + d, x + n / 2, n / 2, 2 * d);
+    std::thread subthread = std::thread(&ifft_radix2_parallel_dac_, y, x, n/2, 2*d);
+    ifft_radix2_parallel_dac_(y + d, x + n / 2, n / 2, 2 * d);
     subthread.join();
 
     // Merging
@@ -189,6 +191,22 @@ void ifft_radix2_parallel_baseline(const Complex *y, Complex *x, int n, int d) {
     }
 }
 
+void fft_radix2_parallel_dac(const Complex *x, Complex *y, int n) {
+    if (n & (n-1)) {
+        std::cerr << "Input size must be a power of 2" << std::endl;
+        return;
+    }
+    fft_radix2_parallel_dac_(x, y, n, 1);
+}
+
+void ifft_radix2_parallel_dac(const Complex *y, Complex *x, int n) {
+    if (n & (n-1)) {
+        std::cerr << "Input size must be a power of 2" << std::endl;
+        return;
+    }
+    ifft_radix2_parallel_dac_(y, x, n, 1);
+}
+
 void fft_radix2_parallel_thread(const Complex *x, Complex *y, int n, int d) {
     /*
         Thread function for the parallel algorithm
@@ -200,22 +218,23 @@ void fft_radix2_parallel_thread(const Complex *x, Complex *y, int n, int d) {
     */
 }
 
-void fft_merge_parallel(Complex* z, Complex* y, int n, int d) {
+void fft_merge_parallel(Complex* z, Complex* y, int k, int n, int d) {
     /*
         Thread function for the parallel algorithm
         Help with merging
         Perform basic fft
     */
-    Complex omega = nth_primitive_root(n);
-    for (int k = 0; k < n; k++) {
-        y[k*d] = 0.0;
+    Complex omega   = nth_primitive_root(n);
+    Complex omega_d = nth_primitive_root(n*d);
+    for (int i = 0; i < d; i ++) {
+        y[i+k*d] = 0.0;
         for (int j = 0; j < n; j++) {
-            y[k*d] = y[k*d] + z[j*d] * pow(omega, -k * j);
+            y[i+k*d] = y[i+k*d] + z[i+j*d] * pow(omega, -k * j) * pow(omega_d, -i * j);
         }
     }
 }
 
-void fft_radix2_parallel(const Complex *x, Complex *y, int n, int n_thread) {
+void fft_radix2_parallel_our(const Complex *x, Complex *y, int n, int n_thread) {
     /*
         Inversed Fast Fourier transform implementation - Cooley-Tukey algorithm
         Parallelized algorithm
@@ -226,13 +245,13 @@ void fft_radix2_parallel(const Complex *x, Complex *y, int n, int n_thread) {
     */
 
     // n need to be power of 2
-    if (n && (n-1)) {
+    if (n & (n-1)) {
         std::cerr << "n needs to be powers of 2, but got " << n << std::endl;
         return;
     }
 
     // n_thread need to be power of 2
-    if (n_thread && (n_thread-1)) {
+    if (n_thread & (n_thread-1)) {
         std::cerr << "n_thread needs to be powers of 2, but got " << n_thread << std::endl;
         return;
     }
@@ -252,7 +271,7 @@ void fft_radix2_parallel(const Complex *x, Complex *y, int n, int n_thread) {
     // Locking & mallocing
     // std::atomic<int> count(1);
     Complex *z = (Complex *) std::malloc(n*sizeof(Complex));
-
+    
     // Recursive calls
     std::vector<std::thread> threads  = std::vector<std::thread>(n_thread-1);
     std::vector<std::thread> threads2 = std::vector<std::thread>(n_thread-1);
@@ -260,19 +279,19 @@ void fft_radix2_parallel(const Complex *x, Complex *y, int n, int n_thread) {
         threads[i-1] = std::thread(&fft_radix2_seq_, x+i, z+i*n/n_thread, n/n_thread, n_thread);
     }
     fft_radix2_seq_(x, z, n/n_thread, n_thread);
-
+    
     // Syncing
     // while (count.load() != n_thread) {}
     for (int i = 1; i < n_thread; i ++) {
         threads[i-1].join();
     }
-
+    
     // Merging
     for (int i = 1; i < n_thread; i ++) {
-        threads2[i-1] = std::thread(&fft_merge_parallel, z+i, y+i, n/n_thread, n_thread);
+        threads2[i-1] = std::thread(&fft_merge_parallel, z, y, i, n_thread, n/n_thread);
     }
-    fft_merge_parallel(z, y, n/n_thread, n_thread);
-
+    fft_merge_parallel(z, y, 0, n_thread, n/n_thread);
+    
     // Joining and freeing
     for (int i = 1; i < n_thread; i ++) {
         threads2[i-1].join();
@@ -281,23 +300,24 @@ void fft_radix2_parallel(const Complex *x, Complex *y, int n, int n_thread) {
     return;
 }
 
-void ifft_merge_parallel(Complex* z, Complex* x, int n, int d) {
+void ifft_merge_parallel(Complex* z, Complex* x, int k, int n, int d) {
     /*
         Thread function for the parallel (inverse) algorithm
         Help with merging
         Perform basic ifft
     */
     Complex omega = nth_primitive_root(n);
-    for (int k = 0; k < n; k++) {
-        x[k*d] = 0.;
+    Complex omega_d = nth_primitive_root(n*d);
+    for (int i = 0; i < d; i ++) {
+        x[i+k*d] = 0.;
         for (int j = 0; j < n; j++) {
-            x[k*d] = x[k*d] + z[j*d] * pow(omega, k * j);
+            x[i+k*d] = x[i+k*d] + z[i+j*d] * pow(omega, k * j) * pow(omega_d, i * j);
         }
-        x[k*d] = x[k*d] / (Complex) n;
+        x[i+k*d] = x[i+k*d] / (Complex) n;
     }
 }
 
-void ifft_radix2_parallel(const Complex *y, Complex *x, int n, int n_thread) {
+void ifft_radix2_parallel_our(const Complex *y, Complex *x, int n, int n_thread) {
     /*
         Inversed Fast Fourier transform implementation - Cooley-Tukey algorithm
         Parallelized algorithm
@@ -308,13 +328,13 @@ void ifft_radix2_parallel(const Complex *y, Complex *x, int n, int n_thread) {
     */
 
     // n need to be power of 2
-    if (n && (n-1)) {
+    if (n & (n-1)) {
         std::cerr << "n needs to be powers of 2, but got " << n << std::endl;
         return;
     }
 
     // n_thread need to be power of 2
-    if (n_thread && (n_thread-1)) {
+    if (n_thread & (n_thread-1)) {
         std::cerr << "n_thread needs to be powers of 2, but got " << n_thread << std::endl;
         return;
     }
@@ -351,9 +371,9 @@ void ifft_radix2_parallel(const Complex *y, Complex *x, int n, int n_thread) {
 
     // Merging
     for (int i = 1; i < n_thread; i ++) {
-        threads2[i-1] = std::thread(&ifft_merge_parallel, z+i, x+i, n/n_thread, n_thread);
+        threads2[i-1] = std::thread(&ifft_merge_parallel, z, x, i, n_thread, n/n_thread);
     }
-    ifft_merge_parallel(z, x, n/n_thread, n_thread);
+    ifft_merge_parallel(z, x, 0, n_thread, n/n_thread);
 
     // Joining and freeing
     for (int i = 1; i < n_thread; i ++) {

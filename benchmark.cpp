@@ -28,13 +28,20 @@ void benchmark_fft(Complex *data, int n,
         std::cout << "Elapsed time for IFFT: " << elapsed_seconds.count()
                   << "ms" << std::endl;
     }
-
+    bool flag_correct = 1;
     for (int i = 0; i < n; i++) {
-        if (abs(z[i] - data[i]) > 1e-3) {
-            std::cout << "Error in fft: " << i << std::endl;
+        if (abs(z[i] - data[i]) > 1e-9) {
+            flag_correct = 0;
+            std::cout << "Error in fft at ind: " << i
+                      << ", got " << z[i] << " instead of " << data[i] << std::endl;
         }
     }
-
+    if (flag_correct) {
+        std::cout << "FFT WORKS!" << std::endl; 
+    } else {
+        std::cout << "It doesn't" << std::endl; 
+    }
+    
     delete[] data_coef;
     delete[] z;
 }
