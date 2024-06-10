@@ -2,32 +2,73 @@
 #include "integersmodp.h"
 #include "polymult.h"
 
-void benchmark_fft(Complex *data, int n,
+void benchmark_fft_seq(Complex *data, int n,
                    std::function<void(const Complex *, Complex *, int)> fft,
                    std::function<void(const Complex *, Complex *, int)> ifft) {
-    std::cout << "Benchmarking FFComplex with data length " << n << "... "
+    std::cout << "Benchmarking Seq FFT with data length " << n << "... "
               << std::endl;
-    const auto start{std::chrono::steady_clock::now()};
+    
     Complex *data_coef = new Complex[n];
     Complex *z = new Complex[n];
-
-    fft(data, data_coef, n);
-    for (int i = 0; i < n; i++) {
-        std::cout << data_coef[i] << " ";
+    {
+        const auto start{std::chrono::steady_clock::now()};
+        fft(data, data_coef, n);
+        const auto end{std::chrono::steady_clock::now()};
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for FFT: " << elapsed_seconds.count() << "ms"
+                << std::endl;
     }
-    std::cout << std::endl;
-    ifft(data_coef, z, n);
-
-    const auto end{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double, std::milli> elapsed_seconds{end -
-                                                                    start};
+    {
+        const auto start{std::chrono::steady_clock::now()};
+            ifft(data_coef, z, n);
+        const auto end{std::chrono::steady_clock::now()};
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for IFFT: " << elapsed_seconds.count() << "ms"
+                << std::endl;
+    }
+    
     for (int i = 0; i < n; i++) {
         if (abs(z[i] - data[i]) > 1e-3) {
             std::cout << "Error in fft: " << i << std::endl;
         }
     }
-    std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
+    
+    delete[] data_coef;
+    delete[] z;
+}
+
+void benchmark_fft_parallel(Complex *data, int n, int num_threads,
+                   std::function<void(const Complex *, Complex *, int, int)> fft,
+                   std::function<void(const Complex *, Complex *, int, int)> ifft) {
+    std::cout << "Benchmarking Parallel FFT with data length " << n << " and " << num_threads << " threads... "
               << std::endl;
+    Complex *data_coef = new Complex[n];
+    Complex *z = new Complex[n];
+    {
+        const auto start{std::chrono::steady_clock::now()};
+        fft(data, data_coef, n, num_threads);
+        const auto end{std::chrono::steady_clock::now()};
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for FFT: " << elapsed_seconds.count() << "ms"
+                << std::endl;
+    }
+    {
+        const auto start{std::chrono::steady_clock::now()};
+            ifft(data_coef, z, n, num_threads);
+        const auto end{std::chrono::steady_clock::now()};
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for IFFT: " << elapsed_seconds.count() << "ms"
+                << std::endl;
+    }
+    for (int i = 0; i < n; i++) {
+        if (abs(z[i] - data[i]) > 1e-3) {
+            std::cout << "Error in fft: " << i << std::endl;
+        }
+    }
     delete[] data_coef;
     delete[] z;
 }

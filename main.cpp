@@ -51,9 +51,9 @@ void run_benchmark_complex() {
         data_complex[i] = i < original_data.size() ? original_data[i] : 0;
     }
     std::cout << "Benchmark Baseline" << std::endl;
-    benchmark_fft(data_complex, N, fft_baseline, ifft_baseline);
+    benchmark_fft_seq(data_complex, N, fft_baseline, ifft_baseline);
     std::cout << "Benchmark Radix2" << std::endl;
-    benchmark_fft(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
+    benchmark_fft_seq(data_complex, N, fft_radix2_seq, ifft_radix2_seq);
 }
 
 void run_benchmark_modp() {

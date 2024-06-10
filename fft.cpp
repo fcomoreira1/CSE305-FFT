@@ -297,7 +297,7 @@ void ifft_merge_parallel(Complex* z, Complex* x, int n, int d) {
     }
 }
 
-void fft_radix2_parallel(const Complex *y, Complex *x, int n, int n_thread) {
+void ifft_radix2_parallel(const Complex *y, Complex *x, int n, int n_thread) {
     /*
         Inversed Fast Fourier transform implementation - Cooley-Tukey algorithm
         Parallelized algorithm
