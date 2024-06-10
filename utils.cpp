@@ -5,8 +5,6 @@
 #include <iostream>
 #include <limits.h>
 
-typedef std::complex<double> Complex;
-
 int intlog2(int n) {
     int log = 0;
     while (n > 1) {

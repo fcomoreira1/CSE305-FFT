@@ -21,18 +21,25 @@ void benchmark_fft_seq(Complex *data, int n,
     }
     {
         const auto start{std::chrono::steady_clock::now()};
-            ifft(data_coef, z, n);
+        ifft(data_coef, z, n);
         const auto end{std::chrono::steady_clock::now()};
         const std::chrono::duration<double, std::milli> elapsed_seconds{end -
                                                                         start};
         std::cout << "Elapsed time for IFFT: " << elapsed_seconds.count() << "ms"
                 << std::endl;
     }
-    
+    bool flag_correct = 1;
     for (int i = 0; i < n; i++) {
-        if (abs(z[i] - data[i]) > 1e-3) {
-            std::cout << "Error in fft: " << i << std::endl;
+        if (abs(z[i] - data[i]) > 1e-9) {
+            flag_correct = 0;
+            std::cout << "Error in fft at ind: " << i
+                      << ", got " << z[i] << " instead of " << data[i] << std::endl;
         }
+    }
+    if (flag_correct) {
+        std::cout << "FFT WORKS!" << std::endl; 
+    } else {
+        std::cout << "It doesn't" << std::endl; 
     }
     
     delete[] data_coef;
