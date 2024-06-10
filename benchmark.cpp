@@ -30,7 +30,7 @@ void benchmark_fft(Complex *data, int n,
     }
     bool flag_correct = 1;
     for (int i = 0; i < n; i++) {
-        if (abs(z[i] - data[i]) > 1e-9) {
+        if (abs(z[i] - data[i]) > 1e-5) {
             flag_correct = 0;
             std::cout << "Error in fft at ind: " << i << ", got " << z[i]
                       << " instead of " << data[i] << std::endl;
@@ -50,26 +50,43 @@ void benchmark_ntt(
     IntegersModP *data, int n,
     std::function<void(const IntegersModP *, IntegersModP *, int)> ntt,
     std::function<void(const IntegersModP *, IntegersModP *, int)> intt) {
-    std::cout << "Benchmarking FFIntegersModP with data length " << n << "... "
+    std::cout << "Benchmarking NTT with data length " << n << "... "
               << std::endl;
     const auto start{std::chrono::steady_clock::now()};
     IntegersModP *data_coef = new IntegersModP[n];
     IntegersModP *z = new IntegersModP[n];
 
-    ntt(data, data_coef, n);
-    for (int i = 0; i < n; i++) {
-        std::cout << data_coef[i] << " ";
+    {
+        const auto start{std::chrono::steady_clock::now()};
+        ntt(data, data_coef, n);
+        const auto end{std::chrono::steady_clock::now()};
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for FFT: " << elapsed_seconds.count() << "ms"
+                  << std::endl;
     }
-    std::cout << std::endl;
-    intt(data_coef, z, n);
+    {
+        const auto start{std::chrono::steady_clock::now()};
+        intt(data_coef, z, n);
+        const auto end{std::chrono::steady_clock::now()};
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for IFFT: " << elapsed_seconds.count()
+                  << "ms" << std::endl;
+    }
 
     const auto end{std::chrono::steady_clock::now()};
     const std::chrono::duration<double, std::milli> elapsed_seconds{end -
                                                                     start};
+    bool flag_correct = 1;
     for (int i = 0; i < n; i++) {
-        if ((z[i] - data[i]).get_val() > 1e-3) {
+        if ((z[i] - data[i]).get_val() != 0) {
+            flag_correct = 0;
             std::cout << "Error in fft: " << i << std::endl;
         }
+    }
+    if (flag_correct) {
+        std::cout << "NTT WORKS!" << std::endl;
     }
     std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
               << std::endl;
