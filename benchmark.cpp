@@ -2,7 +2,7 @@
 #include "integersmodp.h"
 #include "polymult.h"
 
-void benchmark_dct(Complex *data, int n,
+void benchmark_dft(Complex *data, int n,
                    std::function<void(const Complex *, Complex *, int)> fft,
                    std::function<void(const Complex *, Complex *, int)> ifft) {
     std::cout << "Benchmarking FFT with data length " << n << "... "

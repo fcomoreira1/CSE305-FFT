@@ -1,6 +1,6 @@
 #include "benchmark.h"
 #include "compression.h"
-#include "dct.h"
+#include "dft.h"
 #include "integersmodp.h"
 #include "ntt.h"
 #include "parser.h"
@@ -15,10 +15,10 @@
 
 int IntegersModP::p = 5;
 
-auto dct_seq = [](const Complex *x, Complex *y, int n) {
+auto dft_seq = [](const Complex *x, Complex *y, int n) {
     fft_radix2_seq(x, y, n);
 };
-auto idct_seq = [](const Complex *x, Complex *y, int n) {
+auto idft_seq = [](const Complex *x, Complex *y, int n) {
     ifft_radix2_seq(x, y, n);
 };
 auto ntt_seq = [](const IntegersModP *x, IntegersModP *y, int n) {
@@ -27,10 +27,10 @@ auto ntt_seq = [](const IntegersModP *x, IntegersModP *y, int n) {
 auto intt_seq = [](const IntegersModP *x, IntegersModP *y, int n) {
     ifft_radix2_seq(x, y, n);
 };
-auto dct_par = [](const Complex *x, Complex *y, int n) {
+auto dft_par = [](const Complex *x, Complex *y, int n) {
     fft_radix2_parallel_dac(x, y, n);
 };
-auto idct_par = [](const Complex *x, Complex *y, int n) {
+auto idft_par = [](const Complex *x, Complex *y, int n) {
     ifft_radix2_parallel_dac(x, y, n);
 };
 auto ntt_par = [](const IntegersModP *x, IntegersModP *y, int n) {
@@ -184,10 +184,10 @@ void run_benchmark_polmult() {
             P1[i] = rand() % 20 - 10;
             P2[i] = rand() % 20 - 10;
         }
-        benchmark_polmult(P1, P2, ntt_seq, intt_seq, dct_seq, idct_seq);
+        benchmark_polmult(P1, P2, ntt_seq, intt_seq, dft_seq, idft_seq);
         std::cout << "Benchmarking Polynomial for N = " << N
                   << " and DAC parallel processing" << std::endl;
-        benchmark_polmult(P1, P2, ntt_par, intt_par, dct_par, idct_par);
+        benchmark_polmult(P1, P2, ntt_par, intt_par, dft_par, idft_par);
         std::vector<int> n_threads{8,};
         for (auto num_threads : n_threads) {
             std::cout << "Benchmarking Polynomial for N = " << N << " with "
@@ -200,14 +200,14 @@ void run_benchmark_polmult() {
                                            IntegersModP *x, int n) {
                 ifft_radix2_parallel_our(y, x, n, num_threads);
             };
-            auto dct_our = [&num_threads](const Complex *x, Complex *y, int n) {
+            auto dft_our = [&num_threads](const Complex *x, Complex *y, int n) {
                 fft_radix2_parallel_our(x, y, n, num_threads);
             };
-            auto idct_our = [&num_threads](const Complex *y, Complex *x,
+            auto idft_our = [&num_threads](const Complex *y, Complex *x,
                                            int n) {
                 ifft_radix2_parallel_our(y, x, n, num_threads);
             };
-            benchmark_polmult(P1, P2, ntt_our, intt_our, dct_our, idct_our);
+            benchmark_polmult(P1, P2, ntt_our, intt_our, dft_our, idft_our);
         }
         std::cout << std::endl << std::endl;
         P1.clear();
@@ -266,14 +266,14 @@ void run_benchmark_complex_extensive() {
         }
         if (N < 1e5) {
             std::cout << "Benchmark Baseline" << std::endl;
-            benchmark_dct(data_complex, N, dct_baseline, idct_baseline);
+            benchmark_dft(data_complex, N, dft_baseline, idft_baseline);
         }
         std::cout << "Benchmark Radix2" << std::endl;
-        benchmark_dct(data_complex, N, dct_seq, idct_seq);
+        benchmark_dft(data_complex, N, dft_seq, idft_seq);
         std::cout << std::endl;
 
         std::cout << "Benchmark parallel DAC" << std::endl;
-        benchmark_dct(data_complex, N, dct_par, idct_par);
+        benchmark_dft(data_complex, N, dft_par, idft_par);
         std::cout << std::endl;
 
         std::vector<int> num_threads{2, 4, 8, 16};
@@ -285,7 +285,7 @@ void run_benchmark_complex_extensive() {
             auto ifft_ours1 = [t](const Complex *y, Complex *x, int n) {
                 ifft_radix2_parallel_our(y, x, n, t);
             };
-            benchmark_dct(data_complex, N, fft_ours1, ifft_ours1);
+            benchmark_dft(data_complex, N, fft_ours1, ifft_ours1);
             std::cout << std::endl;
         }
     }
@@ -321,10 +321,10 @@ void test_Bluestein() {
 
 int main() {
     // run_benchmark_complex();
-    test_compress();
+    // test_compress();
     // test_ntt_modp();
-    // run_benchmark_complex_extensive();
-    run_benchmark_modp_extensive();
+    run_benchmark_complex_extensive();
+    // run_benchmark_modp_extensive();
     // run_benchmark_polmult();
     // test_Bluestein();
     return 0;
