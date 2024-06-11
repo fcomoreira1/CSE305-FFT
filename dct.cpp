@@ -391,7 +391,11 @@ void ifft_radix2_parallel_our(const Complex *y, Complex *x, int n, int n_thread)
     return;
 }
 
-void fft_general_seq(const Complex *x, Complex *y, int n) {
+
+
+void fft_general_template(const Complex *x, Complex *y, int n, 
+                          std::function<void(const Complex *, Complex *, int)> fft,
+                          std::function<void(const Complex *, Complex *, int)> ifft) {
     /*
         Bluestein's algorithm that handles general DFT for any length n
         Unparallelized baseline
@@ -424,12 +428,12 @@ void fft_general_seq(const Complex *x, Complex *y, int n) {
 	}
 
 	// Polynomial multiplication with FT
-	fft_radix2_seq(coeffs_a, coeffs_a_y, N);
-	fft_radix2_seq(coeffs_b, coeffs_b_y, N);
+	fft(coeffs_a, coeffs_a_y, N);
+	fft(coeffs_b, coeffs_b_y, N);
 	for (int i = 0; i < N; i ++) {
 		coeffs_tmp[i] = coeffs_a_y[i]*coeffs_b_y[i];
 	}
-	ifft_radix2_seq(coeffs_tmp, coeffs_out, N);
+	ifft(coeffs_tmp, coeffs_out, N);
 
 	// Output
 	for (int i = 0; i < n; i ++) {
@@ -447,7 +451,9 @@ void fft_general_seq(const Complex *x, Complex *y, int n) {
 	return;
 }
 
-void ifft_general_seq(const Complex *y, Complex *x, int n) {
+void ifft_general_template(const Complex *y, Complex *x, int n, 
+                           std::function<void(const Complex *, Complex *, int)> fft,
+                           std::function<void(const Complex *, Complex *, int)> ifft) {
     /*
         Bluestein's algorithm. Handles inverse DFT for any length n
         Unparallelized baseline
@@ -480,12 +486,12 @@ void ifft_general_seq(const Complex *y, Complex *x, int n) {
 	}
 
 	// Polynomial multiplication with FT
-	fft_radix2_seq(coeffs_a, coeffs_a_x, N);
-	fft_radix2_seq(coeffs_b, coeffs_b_x, N);
+	fft(coeffs_a, coeffs_a_x, N);
+	fft(coeffs_b, coeffs_b_x, N);
 	for (int i = 0; i < N; i ++) {
 		coeffs_tmp[i] = coeffs_a_x[i]*coeffs_b_x[i];
 	}
-	ifft_radix2_seq(coeffs_tmp, coeffs_out, N);
+	ifft(coeffs_tmp, coeffs_out, N);
 
 	// Output
 	for (int i = 0; i < n; i ++) {
@@ -502,3 +508,37 @@ void ifft_general_seq(const Complex *y, Complex *x, int n) {
 	free ((void *) coeffs_out);
 	return;
 }
+
+// Bluestein's algorithm
+// Sequential and parallelized analogs
+// One-line implementation base on the functions
+//     fft_general_template and ifft_general_template
+
+void fft_general_seq(const Complex *x, Complex *y, int n) {
+    fft_general_template(x, y, n, fft_radix2_seq, ifft_radix2_seq);
+}
+
+void ifft_general_seq(const Complex *y, Complex *x, int n) {
+    ifft_general_template(y, x, n, fft_radix2_seq, ifft_radix2_seq);
+}
+
+void fft_general_dac(const Complex *x, Complex *y, int n) {
+    fft_general_template(x, y, n, fft_radix2_parallel_dac, ifft_radix2_parallel_dac);
+}
+
+void ifft_general_dac(const Complex *y, Complex *x, int n) {
+    ifft_general_template(y, x, n, fft_radix2_parallel_dac, ifft_radix2_parallel_dac);
+}
+
+void fft_general_our(const Complex *x, Complex *y, int n, int d) {
+    auto fft  = [&d](const Complex *x, Complex *y, int n) {fft_radix2_parallel_our(x, y, n, d);};
+    auto ifft = [&d](const Complex *y, Complex *x, int n) {fft_radix2_parallel_our(y, x, n, d);};
+    fft_general_template(x, y, n, fft, ifft);
+}
+
+void ifft_general_our(const Complex *y, Complex *x, int n, int d) {
+    auto fft  = [&d](const Complex *x, Complex *y, int n) {fft_radix2_parallel_our(x, y, n, d);};
+    auto ifft = [&d](const Complex *y, Complex *x, int n) {fft_radix2_parallel_our(y, x, n, d);};
+    ifft_general_template(y, x, n, fft, ifft);
+}
+
