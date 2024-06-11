@@ -5,7 +5,7 @@
 void benchmark_fft(Complex *data, int n,
                    std::function<void(const Complex *, Complex *, int)> fft,
                    std::function<void(const Complex *, Complex *, int)> ifft) {
-    std::cout << "Benchmarking Seq FFT with data length " << n << "... "
+    std::cout << "Benchmarking FFT with data length " << n << "... "
               << std::endl;
 
     Complex *data_coef = new Complex[n];
