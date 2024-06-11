@@ -103,17 +103,6 @@ void benchmark_polmult(
         std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
                   << std::endl;
     }
-
-    std::cout << "Benchmarking PolMult NTT" << std::endl;
-    std::vector<int> res_ntt;
-    {
-        auto start = std::chrono::steady_clock::now();
-        res_ntt = polmult_ntt(P1, P2, ntt, intt);
-        auto end = std::chrono::steady_clock::now();
-        std::chrono::duration<double, std::milli> elapsed_seconds{end - start};
-        std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
-                  << std::endl;
-    }
     std::cout << "Benchmarking PolMult FFT" << std::endl;
     std::vector<Complex> res_fft;
     std::vector<Complex> P1_complex(P1.begin(), P1.end());
@@ -121,6 +110,17 @@ void benchmark_polmult(
     {
         auto start = std::chrono::steady_clock::now();
         res_fft = polmult_fft(P1_complex, P2_complex, fft, ifft);
+        auto end = std::chrono::steady_clock::now();
+        std::chrono::duration<double, std::milli> elapsed_seconds{end - start};
+        std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
+                  << std::endl;
+    }
+
+    std::cout << "Benchmarking PolMult NTT" << std::endl;
+    std::vector<int> res_ntt;
+    {
+        auto start = std::chrono::steady_clock::now();
+        res_ntt = polmult_ntt(P1, P2, ntt, intt);
         auto end = std::chrono::steady_clock::now();
         std::chrono::duration<double, std::milli> elapsed_seconds{end - start};
         std::cout << "Elapsed time: " << elapsed_seconds.count() << "ms"
