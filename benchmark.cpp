@@ -93,6 +93,7 @@ void benchmark_polmult(
     std::function<void(const Complex *, Complex *, int)> fft,
     std::function<void(const Complex *, Complex *, int)> ifft) {
 
+    std::cout << "------------------------------" << std::endl;
     std::cout << "Benchmarking PolMult Baseline" << std::endl;
     std::vector<int> res_baseline;
     if (P1.size() + P2.size() <= 1 << 17) {
@@ -136,6 +137,7 @@ void benchmark_polmult(
                       << std::endl;
         }
     }
+    std::cout << std::endl << std::endl;
     // std::cout << "Resulting polynomial is: " << std::endl;
     // for (int i = 0; i < res_baseline.size(); i++) {
     //     std::cout << res_baseline[i] << " ";
