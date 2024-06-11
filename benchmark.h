@@ -5,7 +5,7 @@
 #include <functional>
 #include <iostream>
 typedef std::complex<double> Complex;
-void benchmark_fft(
+void benchmark_dct(
     Complex *data, int n,
     std::function<void(const Complex *, Complex *, int)> fft,
     std::function<void(const Complex *, Complex *, int)> ifft);

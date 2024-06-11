@@ -190,14 +190,14 @@ void run_benchmark_complex_extensive() {
         }
         if (N < 1e5) {
             std::cout << "Benchmark Baseline" << std::endl;
-            benchmark_fft(data_complex, N, dct_baseline, idct_baseline);
+            benchmark_dct(data_complex, N, dct_baseline, idct_baseline);
         }
         std::cout << "Benchmark Radix2" << std::endl;
-        benchmark_fft(data_complex, N, dct_seq, idct_seq);
+        benchmark_dct(data_complex, N, dct_seq, idct_seq);
         std::cout << std::endl;
 
         std::cout << "Benchmark parallel baseline" << std::endl;
-        benchmark_fft(data_complex, N, dct_par, idct_par);
+        benchmark_dct(data_complex, N, dct_par, idct_par);
         std::cout << std::endl;
 
         std::vector<int> num_threads{2, 4, 8, 16};
@@ -209,7 +209,7 @@ void run_benchmark_complex_extensive() {
             auto ifft_ours1 = [t](const Complex *y, Complex *x, int n) {
                 ifft_radix2_parallel_our(y, x, n, t);
             };
-            benchmark_fft(data_complex, N, fft_ours1, ifft_ours1);
+            benchmark_dct(data_complex, N, fft_ours1, ifft_ours1);
             std::cout << std::endl;
         }
     }
