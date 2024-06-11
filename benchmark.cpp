@@ -13,14 +13,6 @@ void benchmark_dct(Complex *data, int n,
     {
         const auto start{std::chrono::steady_clock::now()};
         fft(data, data_coef, n);
-        const auto end{std::chrono::steady_clock::now()};
-        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
-                                                                        start};
-        std::cout << "Elapsed time for FFT: " << elapsed_seconds.count() << "ms"
-                  << std::endl;
-    }
-    {
-        const auto start{std::chrono::steady_clock::now()};
         ifft(data_coef, z, n);
         const auto end{std::chrono::steady_clock::now()};
         const std::chrono::duration<double, std::milli> elapsed_seconds{end -
@@ -103,7 +95,7 @@ void benchmark_polmult(
 
     std::cout << "Benchmarking PolMult Baseline" << std::endl;
     std::vector<int> res_baseline;
-    {
+    if (P1.size() + P2.size() <= 1 << 17) {
         auto start = std::chrono::steady_clock::now();
         res_baseline = polmult_baseline(P1, P2);
         auto end = std::chrono::steady_clock::now();

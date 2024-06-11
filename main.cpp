@@ -106,13 +106,13 @@ void run_benchmark_polmult() {
                   << " and sequential processing" << std::endl;
         for (int i = 0; i < N; i++) {
             P1[i] = rand() % 20 - 10;
-            P2[i] = rand() % 10 - 10;
+            P2[i] = rand() % 20 - 10;
         }
         benchmark_polmult(P1, P2, ntt_seq, intt_seq, dct_seq, idct_seq);
         std::cout << "Benchmarking Polynomial for N = " << N
                   << " and DAC parallel processing" << std::endl;
         benchmark_polmult(P1, P2, ntt_par, intt_par, dct_par, idct_par);
-        std::vector<int> n_threads{2, 4, 8};
+        std::vector<int> n_threads{8,};
         for (auto num_threads : n_threads) {
             std::cout << "Benchmarking Polynomial for N = " << N << " with "
                       << num_threads << " threads" << std::endl;
@@ -140,7 +140,7 @@ void run_benchmark_polmult() {
 }
 
 void run_benchmark_modp_extensive() {
-    for (int N = 1 << 12; N <= 1 << 26; N *= 2) {
+    for (int N = 1 << 14; N <= 1 << 26; N *= 2) {
         std::cout << "Using N = " << N << std::endl;
         IntegersModP::p = prime_arithmetic_sequence(N, N + 1);
         auto *data_modp = new IntegersModP[N];
@@ -196,7 +196,7 @@ void run_benchmark_complex_extensive() {
         benchmark_dct(data_complex, N, dct_seq, idct_seq);
         std::cout << std::endl;
 
-        std::cout << "Benchmark parallel baseline" << std::endl;
+        std::cout << "Benchmark parallel DAC" << std::endl;
         benchmark_dct(data_complex, N, dct_par, idct_par);
         std::cout << std::endl;
 
@@ -248,8 +248,8 @@ int main() {
     // test_compress();
     // test_ntt_modp();
     // run_benchmark_complex_extensive();
-    // run_benchmark_modp_extensive();
+    run_benchmark_modp_extensive();
     // run_benchmark_polmult();
-    test_Bluestein();
+    // test_Bluestein();
     return 0;
 }

@@ -225,8 +225,9 @@ void fft_merge_parallel(Complex* z, Complex* y, int k, int n, int d) {
         Perform basic fft
     */
     Complex omega = pow(nth_primitive_root(n), -k);
+    Complex omega_d = 1.;
+    Complex omega_d_mult = 1.0 / nth_primitive_root(n*d);
     for (int i = 0; i < d; i ++) {
-        Complex omega_d  = pow(nth_primitive_root(n*d), -i);
         Complex omega_d_ = 1.;
         Complex omega_   = 1.;
         y[i+k*d] = 0.0;
@@ -235,6 +236,7 @@ void fft_merge_parallel(Complex* z, Complex* y, int k, int n, int d) {
             omega_   = omega_  *omega;
             omega_d_ = omega_d_*omega_d;
         }
+        omega_d *= omega_d_mult;
     }
 }
 
@@ -311,8 +313,9 @@ void ifft_merge_parallel(Complex* z, Complex* x, int k, int n, int d) {
         Perform basic ifft
     */
     Complex omega = pow(nth_primitive_root(n), k);
+    Complex omega_d = 1.;
+    Complex omega_d_mult = nth_primitive_root(n*d);
     for (int i = 0; i < d; i ++) {
-        Complex omega_d  = pow(nth_primitive_root(n*d), i);
         Complex omega_d_ = 1.;
         Complex omega_   = 1.;
         x[i+k*d] = 0.;
@@ -322,6 +325,7 @@ void ifft_merge_parallel(Complex* z, Complex* x, int k, int n, int d) {
             omega_d_ = omega_d_*omega_d;
         }
         x[i+k*d] = x[i+k*d] / (Complex) n;
+        omega_d *= omega_d_mult;
     }
 }
 
