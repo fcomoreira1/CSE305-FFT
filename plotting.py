@@ -76,27 +76,31 @@ if __name__ == '__main__':
     # if len(inp) < 10:
     #     assert False, 'Not enough args'
 
-    f = open(sys.argv[-1], 'r')
-    line = f.read()[:-1]
-    
-    inp = line.split(' ')
+    plt.figure(figsize=(20,12))
+    for i in range(1, len(sys.argv)):
 
-    data = []
-    for i in range(1, len(inp)-8):
-        data.append(float(inp[i]))
+        f = open(sys.argv[i], 'r')
+        line = f.read()[:-1]
+        
+        inp = line.split(' ')
 
-    input_size, plot_name, plot_x_type, plot_x_min, plot_x_max, plot_x_label, plot_y_label = inp[-8:-1]
+        data = []
+        for i in range(1, len(inp)-8):
+            data.append(float(inp[i]))
 
-    # Plotting
-    if plot_x_type == 'date':
-        x = pd.date_range(start = plot_x_min, end=plot_x_max, periods = int(input_size)-1)
-        plt.xticks(rotation=30)
-        plt.gca().xaxis.set_minor_locator(mdates.MonthLocator(bymonth=[4,7,10]))
-    else:
-        x = np.linspace(plot_x_min, plot_x_max, int(input_size))
-    plt.plot(x, data)
-    plt.title(plot_name)
-    plt.xlabel(plot_x_label)
-    plt.ylabel(plot_y_label)
+        input_size, plot_name, plot_x_type, plot_x_min, plot_x_max, plot_x_label, plot_y_label = inp[-8:-1]
+
+        # Plotting
+        if plot_x_type == 'date':
+            x = pd.date_range(start = plot_x_min, end=plot_x_max, periods = int(input_size)-1)
+            plt.xticks(rotation=30)
+            plt.gca().xaxis.set_minor_locator(mdates.MonthLocator(bymonth=[4,7,10]))
+        else:
+            x = np.linspace(plot_x_min, plot_x_max, int(input_size))
+        plt.plot(x, data)
+        plt.title(plot_name.replace('_',' '))
+        plt.xlabel(plot_x_label)
+        plt.ylabel(plot_y_label)
+
     plt.savefig(inp[-1])
 

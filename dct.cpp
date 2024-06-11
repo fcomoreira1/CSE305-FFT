@@ -532,13 +532,13 @@ void ifft_general_dac(const Complex *y, Complex *x, int n) {
 
 void fft_general_our(const Complex *x, Complex *y, int n, int d) {
     auto fft  = [&d](const Complex *x, Complex *y, int n) {fft_radix2_parallel_our(x, y, n, d);};
-    auto ifft = [&d](const Complex *y, Complex *x, int n) {fft_radix2_parallel_our(y, x, n, d);};
+    auto ifft = [&d](const Complex *y, Complex *x, int n) {ifft_radix2_parallel_our(y, x, n, d);};
     fft_general_template(x, y, n, fft, ifft);
 }
 
 void ifft_general_our(const Complex *y, Complex *x, int n, int d) {
     auto fft  = [&d](const Complex *x, Complex *y, int n) {fft_radix2_parallel_our(x, y, n, d);};
-    auto ifft = [&d](const Complex *y, Complex *x, int n) {fft_radix2_parallel_our(y, x, n, d);};
+    auto ifft = [&d](const Complex *y, Complex *x, int n) {ifft_radix2_parallel_our(y, x, n, d);};
     ifft_general_template(y, x, n, fft, ifft);
 }
 

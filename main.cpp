@@ -7,6 +7,12 @@
 #include "utils.h"
 #include <iostream>
 
+#define METHOD_RADIX2 0
+#define METHOD_BLUESTEIN 1
+#define DATA_DELHI 0
+#define DATA_MP 1
+
+
 int IntegersModP::p = 5;
 
 auto dct_seq = [](const Complex *x, Complex *y, int n) {
@@ -34,43 +40,113 @@ auto intt_par = [](const IntegersModP *x, IntegersModP *y, int n) {
     ifft_radix2_parallel_dac(x, y, n);
 };
 
-void test_compress() {
-    std::string filename = "data/DailyDelhiClimateTrain.csv";
-    std::vector<double> original_data = readCSV(filename, 1);
-    int N = pow2greater(original_data.size());
-    Complex *data_complex = new Complex[N];
-    for (int i = 0; i < N; i++) {
-        data_complex[i] = i < original_data.size() ? original_data[i] : 0;
+void test_compress(int data = DATA_MP, int method = METHOD_BLUESTEIN, int step=6*6) {
+    std::string filename;
+    std::vector<double> raw_data;
+    std::vector<double> original_data;
+    if (data == DATA_DELHI) {
+        filename = "data/DailyDelhiClimateTrain.csv";
+        raw_data = readCSV(filename, 1);
+    } else {
+        filename = "data/max_planck_weather_ts.csv";
+        raw_data = readCSV(filename, 2);
     }
+    for (int i = 0; i < raw_data.size(); i += step) {
+        original_data.push_back(raw_data[i]);
+    }
+    std::vector<double> real_decompressed_data(original_data.size());
     int size_compression = 20;
     auto compressed_data = new std::pair<Complex, int>[size_compression];
-    auto fft = [](const Complex *x, Complex *y, int n) {
-        fft_radix2_parallel_our(x, y, n, 8);
-    };
-    auto ifft = [](const Complex *x, Complex *y, int n) {
-        ifft_radix2_parallel_our(x, y, n, 8);
-    };
-    compress_from_fft(data_complex, N, compressed_data, size_compression, fft);
-    for (int i = 0; i < size_compression; i++) {
-        std::cout << compressed_data[i].second << " ";
+    Complex *decompressed_data;
+
+    if (method == METHOD_RADIX2) {
+        std::cout << "Running test using radix2 ...\n";
+    } else {
+        std::cout << "Running test using Bluestein ...\n";
     }
-    Complex *decompressed_data = new Complex[N];
-    decompress_from_fft(compressed_data, size_compression, decompressed_data, N,
-                        ifft);
-    std::vector<double> real_decompressed_data(original_data.size());
-    for (int i = 0; i < real_decompressed_data.size(); i++) {
-        real_decompressed_data[i] = decompressed_data[i].real();
+
+    if (method == METHOD_RADIX2) {
+        int N = pow2greater(original_data.size());
+        Complex *data_complex = new Complex[N];
+        for (int i = 0; i < N; i++) {
+            data_complex[i] = i < original_data.size() ? original_data[i] : 0;
+        }
+        auto fft = [](const Complex *x, Complex *y, int n) {
+            fft_radix2_parallel_our(x, y, n, 8);
+        };
+        auto ifft = [](const Complex *x, Complex *y, int n) {
+            ifft_radix2_parallel_our(x, y, n, 8);
+        };
+        const auto start{std::chrono::steady_clock::now()};
+        compress_from_fft(data_complex, N, compressed_data, size_compression, fft);
+        for (int i = 0; i < size_compression; i++) {
+            std::cout << compressed_data[i].second << " ";
+        }
+        std::cout << std::endl;
+        decompressed_data = new Complex[N];
+        decompress_from_fft(compressed_data, size_compression, decompressed_data, N,
+                            ifft);
+        const auto end{std::chrono::steady_clock::now()};
+        for (int i = 0; i < real_decompressed_data.size(); i++) {
+            real_decompressed_data[i] = decompressed_data[i].real();
+        }
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for compression: " << elapsed_seconds.count()
+                  << " ms" << std::endl;
+        std::cout << "MSE error: " << MSE(real_decompressed_data, original_data) << std::endl;
+    } else {
+        int N = original_data.size();
+        Complex *data_complex = new Complex[N];
+        for (int i = 0; i < N; i++) {
+            data_complex[i] = original_data[i];
+        }
+        auto fft = [](const Complex *x, Complex *y, int n) {
+            fft_general_our(x, y, n, 4);
+        };
+        auto ifft = [](const Complex *y, Complex *x, int n) {
+            ifft_general_our(y, x, n, 4);
+        };
+        const auto start{std::chrono::steady_clock::now()};
+        compress_from_fft(data_complex, N, compressed_data, size_compression, fft);
+        std::cout << "Length: " << original_data.size() << std::endl;
+        for (int i = 0; i < size_compression; i++) {
+            std::cout << compressed_data[i].second << " ";
+        }
+        std::cout << std::endl;
+        decompressed_data = new Complex[N];
+        decompress_from_fft(compressed_data, size_compression, decompressed_data, N,
+                            ifft);
+        const auto end{std::chrono::steady_clock::now()};
+        for (int i = 0; i < real_decompressed_data.size(); i++) {
+            real_decompressed_data[i] = decompressed_data[i].real();
+        }
+        const std::chrono::duration<double, std::milli> elapsed_seconds{end -
+                                                                        start};
+        std::cout << "Elapsed time for compression: " << elapsed_seconds.count()
+                  << " ms" << std::endl;
+        std::cout << "MSE error : " << MSE(real_decompressed_data, original_data) << std::endl;
     }
-    plotData(real_decompressed_data, "data/decompressed_data", "data/data.txt");
-    system("python plotting.py data/_in_data.txt");
-    plotData(original_data, "data/original_data", "data/data.txt");
-    system("python plotting.py data/_in_data.txt");
+
+    std::string x_min, x_max, name;
+    if (data == DATA_DELHI) {
+        x_min = "2013-01-01"; x_max = "2017-01-01"; name = "data/plot_delhi.png";
+    } else {
+        x_min = "2009-01-01"; x_max = "2017-01-01"; name = "data/plot_delhi.png";
+    }
+
+    plotData(real_decompressed_data, name, "data/_in_data1.txt", "Weather_data",
+             "Date", "Temperature", "date", x_min, x_max);
+    plotData(original_data, name, "data/_in_data2.txt", "Weather_data",
+             "Date", "Temperature", "date", x_min, x_max);
+    system("python plotting.py data/_in_data2.txt data/_in_data1.txt");
     std::cout << "Compression Rate: "
               << sizeof(*compressed_data) * size_compression /
                      (double)(original_data.size() * sizeof(original_data[0]));
     delete[] compressed_data;
     delete[] decompressed_data;
 }
+
 
 void test_ntt_modp() {
     std::cout << "Starting random test" << std::endl;
@@ -245,11 +321,11 @@ void test_Bluestein() {
 
 int main() {
     // run_benchmark_complex();
-    // test_compress();
+    test_compress();
     // test_ntt_modp();
     // run_benchmark_complex_extensive();
     // run_benchmark_modp_extensive();
     // run_benchmark_polmult();
-    test_Bluestein();
+    // test_Bluestein();
     return 0;
 }

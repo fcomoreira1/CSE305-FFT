@@ -108,7 +108,7 @@ void plotData(std::vector<double> input, std::string plotname,
     // std::cout << "Finished generating file!" << std::endl;
 
     std::ofstream fs;
-    fs.open("data/_in_data.txt",
+    fs.open(filename,
             std::ofstream::in | std::ofstream::out | std::ofstream::trunc);
     fs << args;
     fs.close();

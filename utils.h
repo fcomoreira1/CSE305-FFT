@@ -4,6 +4,8 @@
 #include <complex>
 typedef std::complex<double> Complex;
 typedef unsigned long u_long;
+
+double MSE(std::vector<double> y, std::vector<double> y1);
 int intlog2(int n);
 int pow2greater(int n);
 Complex nth_primitive_root(int n);

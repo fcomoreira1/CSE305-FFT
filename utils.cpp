@@ -5,6 +5,14 @@
 #include <iostream>
 #include <limits.h>
 
+double MSE(std::vector<double> y, std::vector<double> y1) {
+    double output = 0.0;
+    for (int i = 0; i < y.size(); i ++) {
+        output += pow(y[i]-y1[i], 2);
+    }
+    return std::sqrt(output/double(y.size()));
+}
+
 int intlog2(int n) {
     int log = 0;
     while (n > 1) {
