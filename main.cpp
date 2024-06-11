@@ -208,13 +208,41 @@ void run_benchmark_complex_extensive() {
         }
     }
 }
+void test_Bluestein() {
+    int n;
+    std::cout << "N: ";
+    std::cin  >> n;
+    Complex *data         = (Complex *) malloc(n*sizeof(Complex));
+    Complex *data_fourier = (Complex *) malloc(n*sizeof(Complex));
+    Complex *data_inverse = (Complex *) malloc(n*sizeof(Complex));
+    double temp;
+    for (int i = 0; i < n; i ++) {
+        std::cout << "Entry " << i << ": ";
+        std::cin  >> temp;
+        data[i] = temp;
+    }
+    std::cout << std::endl;
+    fft_general_seq(data, data_fourier, n);
+    ifft_general_seq(data_fourier, data_inverse, n);
+    for (int i = 0; i < n; i ++) {
+        std::cout << data[i] << "  ";
+    } std::cout << std::endl;
+    for (int i = 0; i < n; i ++) {
+        std::cout << data_fourier[i] << "  ";
+    } std::cout << std::endl;
+    for (int i = 0; i < n; i ++) {
+        std::cout << data_inverse[i] << "  ";
+    }
+}
 
 int main() {
     // run_benchmark_complex();
     // test_compress();
     // test_primitive_root();
     // test_ntt_modp();
-    run_benchmark_complex_extensive();
+    // run_benchmark_complex_extensive();
     // run_benchmark_modp_extensive();
     // run_benchmark_polmult();
+    test_Bluestein();
+    return 0;
 }

@@ -390,3 +390,115 @@ void ifft_radix2_parallel_our(const Complex *y, Complex *x, int n, int n_thread)
     free ((void *) z);
     return;
 }
+
+void fft_general_seq(const Complex *x, Complex *y, int n) {
+    /*
+        Bluestein's algorithm that handles general DFT for any length n
+        Unparallelized baseline
+        Expected complexity: O(nlogn)
+        Input x, output y, length n
+    */
+
+   	// Trivial case
+	if (n <= 10) return fft_baseline(x, y, n);
+
+	// Up bound
+	int N = 1;
+	while (N <= 2*n) {N <<= 2;}
+
+	// Mallocing data
+	Complex *coeffs_0   = (Complex *) malloc(n*sizeof(Complex));
+	Complex *coeffs_a   = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_b   = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_a_y = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_b_y = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_tmp = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_out = (Complex *) malloc(N*sizeof(Complex));
+
+	// Setting up for FT
+	Complex root = nth_primitive_root(2*n);
+	for (int i = 0; i < n; i ++) {coeffs_0[i] = pow(root, -i*i);}
+	for (int i = 0; i < N; i ++) {
+		coeffs_a[i] = (i<n)? (x[i]*pow(root, -i*i)):0.;
+		coeffs_b[i] = (i<(2*n-1))? (pow(root, (i-n+1)*(i-n+1))):0;
+	}
+
+	// Polynomial multiplication with FT
+	fft_radix2_seq(coeffs_a, coeffs_a_y, N);
+	fft_radix2_seq(coeffs_b, coeffs_b_y, N);
+	for (int i = 0; i < N; i ++) {
+		coeffs_tmp[i] = coeffs_a_y[i]*coeffs_b_y[i];
+	}
+	ifft_radix2_seq(coeffs_tmp, coeffs_out, N);
+
+	// Output
+	for (int i = 0; i < n; i ++) {
+		y[i] = coeffs_0[i]*coeffs_out[i+n-1];
+	}
+
+	// Freeing
+	free ((void *) coeffs_0  );	
+	free ((void *) coeffs_a  );
+	free ((void *) coeffs_b  );
+	free ((void *) coeffs_a_y);
+	free ((void *) coeffs_b_y);	
+	free ((void *) coeffs_tmp);
+	free ((void *) coeffs_out);
+	return;
+}
+
+void ifft_general_seq(const Complex *y, Complex *x, int n) {
+    /*
+        Bluestein's algorithm. Handles inverse DFT for any length n
+        Unparallelized baseline
+        Expected complexity: O(nlogn)
+        Input x, output y, length n
+    */
+
+   	// Trivial case
+	if (n <= 10) return ifft_baseline(y, x, n);
+
+	// Up bound
+	int N = 1;
+	while (N <= 2*n) {N <<= 2;}
+
+	// Mallocing data
+	Complex *coeffs_0   = (Complex *) malloc(n*sizeof(Complex));
+	Complex *coeffs_a   = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_b   = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_a_x = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_b_x = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_tmp = (Complex *) malloc(N*sizeof(Complex));
+	Complex *coeffs_out = (Complex *) malloc(N*sizeof(Complex));
+
+	// Setting up for FT
+	Complex root = nth_primitive_root(2*n);
+	for (int i = 0; i < n; i ++) {coeffs_0[i] = pow(root, i*i)/Complex(n);}
+	for (int i = 0; i < N; i ++) {
+		coeffs_a[i] = (i<n)? (y[i]*pow(root, i*i)):0.;
+		coeffs_b[i] = (i<(2*n-1))? (pow(root, -(i-n+1)*(i-n+1))):0;
+	}
+
+	// Polynomial multiplication with FT
+	fft_radix2_seq(coeffs_a, coeffs_a_x, N);
+	fft_radix2_seq(coeffs_b, coeffs_b_x, N);
+	for (int i = 0; i < N; i ++) {
+		coeffs_tmp[i] = coeffs_a_x[i]*coeffs_b_x[i];
+	}
+	ifft_radix2_seq(coeffs_tmp, coeffs_out, N);
+
+	// Output
+	for (int i = 0; i < n; i ++) {
+		x[i] = coeffs_0[i]*coeffs_out[i+n-1];
+	}
+
+	// Freeing
+	free ((void *) coeffs_0  );	
+	free ((void *) coeffs_a  );
+	free ((void *) coeffs_b  );
+	free ((void *) coeffs_a_x);
+	free ((void *) coeffs_b_x);	
+	free ((void *) coeffs_tmp);
+	free ((void *) coeffs_out);
+	return;
+}
