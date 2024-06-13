@@ -175,7 +175,7 @@ void run_benchmark_polmult() {
     std::vector<int> P1;
     std::vector<int> P2;
 
-    for (unsigned long N = 8; N < (1 << 12); N *= 2) {
+    for (unsigned long N = 12; N <= (1 << 20); N *= 2) {
         P1.resize(N);
         P2.resize(N);
         std::cout << "Benchmarking Polynomial for N = " << N
@@ -223,7 +223,7 @@ void run_benchmark_modp_extensive() {
         for (int i = 0; i < N; i++) {
             data_modp[i] = rand() % 10;
         }
-        if (N < 1e5) {
+        if (false && N < 1e5) {
             std::cout << "Benchmark Baseline" << std::endl;
             benchmark_ntt(data_modp, N, ntt_baseline, intt_baseline);
         }
@@ -323,9 +323,9 @@ int main() {
     // run_benchmark_complex();
     // test_compress();
     // test_ntt_modp();
-    run_benchmark_complex_extensive();
+    // run_benchmark_complex_extensive();
     // run_benchmark_modp_extensive();
-    // run_benchmark_polmult();
+    run_benchmark_polmult();
     // test_Bluestein();
     return 0;
 }

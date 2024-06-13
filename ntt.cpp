@@ -157,7 +157,7 @@ void fft_radix2_parallel_dac_(const IntegersModP *x, IntegersModP *y, int n,
 }
 
 void ifft_radix2_parallel_dac_(const IntegersModP *y, IntegersModP *x, int n,
-                               int d) {
+                              int d) {
     /*
         Inversed Fast Fourier transform implementation - Cooley-Txukey algorithm
         Baseline algorithm with minimal change
@@ -225,20 +225,17 @@ void fft_merge_parallel(IntegersModP *z, IntegersModP *y, int k, int n, int d) {
         Help with merging
         Perform basic ntt
     */
-    IntegersModP omega = IntegersModP::pow(nth_primitive_root_modp(n), -k);
-    IntegersModP omega_d = 1;
-    IntegersModP omega_d_mult =
-        IntegersModP::inverse(nth_primitive_root_modp(n * d));
+    const IntegersModP omega = IntegersModP::pow(nth_primitive_root_modp(n), -k);
+    IntegersModP omega_total_mult = omega;
+    IntegersModP omega_d_mult = IntegersModP::inverse(nth_primitive_root_modp(n * d));
     for (int i = 0; i < d; i++) {
-        IntegersModP omega_d_ = 1;
-        IntegersModP omega_ = 1;
+        IntegersModP omega_total = 1;
         y[i + k * d] = 0.0;
         for (int j = 0; j < n; j++) {
-            y[i + k * d] = y[i + k * d] + z[i + j * d] * omega_ * omega_d_;
-            omega_ = omega_ * omega;
-            omega_d_ = omega_d_ * omega_d;
+            y[i + k * d] = y[i + k * d] + z[i + j * d] * omega_total;
+            omega_total = omega_total * omega_total_mult;
         }
-        omega_d = omega_d * omega_d_mult;
+        omega_total_mult = omega_total_mult * omega_d_mult;
     }
 }
 
@@ -320,20 +317,19 @@ void ifft_merge_parallel(IntegersModP *z, IntegersModP *x, int k, int n,
         Help with merging
         Perform basic intt
     */
-    IntegersModP omega = IntegersModP::pow(nth_primitive_root_modp(n), k);
-    IntegersModP omega_d = 1;
+    const IntegersModP omega = IntegersModP::pow(nth_primitive_root_modp(n), k);
+    IntegersModP omega_total_mult = omega;
     IntegersModP omega_d_mul = nth_primitive_root_modp(n * d);
+    IntegersModP inv_n = IntegersModP::inverse(n);
     for (int i = 0; i < d; i++) {
-        IntegersModP omega_d_ = 1.;
-        IntegersModP omega_ = 1.;
+        IntegersModP omega_total = 1.;
         x[i + k * d] = 0.;
         for (int j = 0; j < n; j++) {
-            x[i + k * d] = x[i + k * d] + z[i + j * d] * omega_ * omega_d_;
-            omega_ = omega_ * omega;
-            omega_d_ = omega_d_ * omega_d;
+            x[i + k * d] = x[i + k * d] + z[i + j * d] * omega_total;
+            omega_total = omega_total * omega_total_mult;
         }
-        x[i + k * d] = x[i + k * d] / (IntegersModP)n;
-        omega_d = omega_d * omega_d_mul;
+        x[i + k * d] = x[i + k * d] * inv_n;
+        omega_total_mult = omega_total_mult * omega_d_mul;
     }
 }
 
